@@ -14,34 +14,34 @@
     <h1> Welcome Donor!</h1>
     
  <h3> ALREADY A DONOR?</h3>
-    <form>
+    <form method="POST" action="logindonorpassword">
     
-        <input type="text" placeholder="Enter your username...">
+        <input type="text" name="username" placeholder="Enter your username...">
         
-        <input type="password" placeholder="Enter your password">
+        <input type="password" name="password" placeholder="Enter your password">
 
-        <button> LOGIN</button>
+        <button type="submit"> LOGIN</button>
 
 
     </form>
 
     <h3> REGISTER HERE</h3> 
 
-    <form>
+    <form method="POST" action = registerdonor>
       
-        <input type="text" placeholder="Enter your Name">
+        <input type="text" name = "name" placeholder="Enter your Name">
       
-        <input type="text" placeholder="Enter your Email ID">
+        <input type="text" name = "emailid" placeholder="Enter your Email ID">
        
-        <input type="text" placeholder="Enter your Username">
+        <input type="text" name = "username" placeholder="Enter your Username">
     
-        <input type="password" placeholder="Enter your password">
+        <input type="password" name = "password" placeholder="Enter your password">
        
-        <input type="password" placeholder="Renter your password">
+        <input type="password" name = "password_reenter" placeholder="Renter your password">
         
-        <input type="tel"  placeholder= "Enter your Contact Number">
+        <input type="tel"  name = "phone" placeholder= "Enter your Contact Number">
 
-        <button> REGISTER</button>
+        <button type="submit"> REGISTER</button>
 
 
     </form>
