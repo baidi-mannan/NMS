@@ -1,0 +1,71 @@
+body {
+    color: floralwhite;
+    margin: 0;
+    font-family: 'Raleway', sans-serif;
+    background-color: #2c2f33;
+    user-select: none;
+  }
+*{
+  font-family: 'Raleway', sans-serif;
+
+  } 
+  .body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content:space-around;
+    width: 92vw;
+    padding: 45px;
+  }
+  h1{
+    font-weight: bolder;
+    font-size:40px;
+  }
+  h3{
+    font-size:30px;
+    font-weight: bold;
+  }
+  h1{
+    font-weight: bolder;
+    font-size:40px;
+  }
+  h3{
+    font-size:25px;
+    font-weight: bold;
+  }
+  form {
+      width:35%;
+      height: 280px;
+      display: flex;
+      /* justify-content: space-around; */
+      align-items: center;
+      flex-direction: column;
+      background-color:	#40444c;
+      
+      padding:30px 10px;
+
+
+  }
+  form *{
+    margin: 20px;
+  }
+  input{
+  width: 70%;
+  height:30px;
+  background-color:#23272a;
+  color:#0c140c;
+  border:none;
+  border-bottom: 3px solid grey;
+  color:white;
+
+  }
+  button
+  {
+      cursor: pointer;
+      width:70%;
+      padding:8px;
+      background-color: #fc4444;
+      font-size: 15px;
+      box-shadow:3px 3px 5px black;
+      
+  }
