@@ -1,4 +1,4 @@
-from flask import Flask, render_template,request
+from flask import Flask, render_template,request,session
 import sys
 # import numpy as np
 
@@ -15,7 +15,7 @@ mydbDetails = {
 
 
 app = Flask(__name__)
-
+app.config['SECRET_KEY'] = 'thisissecret'
 
 @app.route("/")
 def home():
@@ -39,12 +39,16 @@ def staffLogin():
 @app.route("/logindonorpassword",methods=["POST"])
 def checkPasswordFromUser():
     # logic login
+    session.pop('loggedin', None)
+    session.pop('name', None)
     mysql = mysqlcon(mydbDetails)
     query = mysql.select(["select passwd,donorname from donors where username = %s",(request.form['username'],)])
     if(len(query)==0):
         return json.dumps({"statusCode":-1,"message":"User doesn't exist"})
     else:
         if(query[0][0] == Password(request.form['password']).getEncryptedPassword()):
+            session['loggedin'] = True
+            session['name'] = query[0][1]
             return json.dumps({"statusCode":1,"message":f"Successful Login {query[0][1]}"})
         else:
             return json.dumps({"statusCode":-2,"message":f"Wrong password"})
@@ -54,7 +58,12 @@ def checkPasswordFromUser():
 
 @app.route("/donorprofilepage")
 def donorprofilepage():
-    return json.dumps({"statusCode":1,"message":"Success"})
+    if hasattr(session,'loggedin'):
+
+        return json.dumps({"statusCode":1,"message":f"Success{session['name']}"})
+    else:
+        return json.dumps({"statusCode":403,"message":"Session not found"})
+    
 
 @app.route("/registerdonor",methods=["POST"])
 def registerdonor():
