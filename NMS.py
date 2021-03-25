@@ -35,6 +35,16 @@ def staff_login_required(f):
             return redirect("/staff-login")
     return wrap
 
+def donor_login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if ('User' in session) and (session['User']['type']=='donor'):
+            return f(*args, **kwargs)
+        else:
+            print("You need to login first",file = sys.stderr)
+            return redirect("/donor-login")
+    return wrap
+
 def manager_login_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -52,6 +62,7 @@ def home():
 
 @app.route("/donor-login", methods=["GET", "POST"])
 def donorLogin():
+    global mysql
     cur = mysql.connection.cursor()
     stmt = "SHOW TABLES LIKE 'donorList'"
     cur.execute(stmt)
@@ -96,6 +107,19 @@ def donorLogin():
         if request.form["button"] == "login":
             userName = donorDetails["userName"]
             password = donorDetails["password"]
+            session.pop('User', None)
+            mysqlc = mysqlcon(mydbDetails)
+            query = mysqlc.select(["select id,userName,name,password from donorList where username = %s",(userName,)])
+            if(len(query)==0):
+                return json.dumps({"statusCode":-1,"message":"User doesn't exist"})
+            else:
+                # if(query[0][3] == Password(password).getEncryptedPassword()):
+                if(query[0][3] == password):
+                    session['User']={'name':query[0][2],'userName':userName,'id':query[0][0],'type':'donor'}
+                    return json.dumps({"statusCode":1,"message":f"Successful Login {query[0][2]}"})
+                else:
+                    return json.dumps({"statusCode":-2,"message":f"Wrong password"})
+            return json.dumps({"statusCode":1,"message":"Success"})
 
     # return "Done!"
     # cur.execute("""CREATE TABLE donorList(id INTEGER , name VARCHAR(20))""")
@@ -118,8 +142,8 @@ def staffcheckpassword():
     userName = staffDetails["userName"]
     password = staffDetails["password"]
     session.pop('User', None)
-    mysql = mysqlcon(mydbDetails)
-    query = mysql.select(["select id,username,name,password from stafflist where username = %s and role = %s",(userName,'staff',)])
+    mysqlc = mysqlcon(mydbDetails)
+    query = mysqlc.select(["select id,username,name,password from stafflist where username = %s and role = %s",(userName,'staff',)])
     if(len(query)==0):
         return json.dumps({"statusCode":-1,"message":"User doesn't exist"})
     else:
@@ -150,8 +174,8 @@ def managercheckpassword():
     userName = managerDetails["userName"]
     password = managerDetails["password"]
     session.pop('User', None)
-    mysql = mysqlcon(mydbDetails)
-    query = mysql.select(["select id,username,name,password from stafflist where username = %s and role = %s",(userName,'manager',)])
+    mysqlc = mysqlcon(mydbDetails)
+    query = mysqlc.select(["select id,username,name,password from stafflist where username = %s and role = %s",(userName,'manager',)])
     if(len(query)==0):
         return json.dumps({"statusCode":-1,"message":"User doesn't exist"})
     else:
@@ -167,6 +191,7 @@ def managercheckpassword():
 @app.route("/managerprofilepage")
 @manager_login_required
 def managerprofilepage():
+    print(f"session['User'] = {session['User']}",file =sys.stderr)
     return f"Hello manager{session['User']['name']}"
 
 @app.route("/managerlogout")
@@ -174,6 +199,18 @@ def managerprofilepage():
 def managerlogout():
     session.pop('User',None)
     return redirect("/manager-login")
+
+@app.route("/donorprofilepage")
+@donor_login_required
+def donorprofilepage():
+    print(f"session['User'] = {session['User']}",file =sys.stderr)
+    return f"Hello donor{session['User']['name']}"
+
+@app.route("/donorlogout")
+@donor_login_required
+def donorlogout():
+    session.pop('User',None)
+    return redirect("/donor-login")
 
 
 
