@@ -56,10 +56,10 @@ def donorLogin():
             # cur.execute("""truncate donorList""")
             mysql.connection.commit()
 
-            # val = cur.execute("""SELECT * FROM donorList""")
-            # if val > 0:
-            #     pri = cur.fetchall()
-            #     print(pri)
+            val = cur.execute("""SELECT * FROM donorList""")
+            if val > 0:
+                pri = cur.fetchall()
+                print(pri)
         if request.form["button"] == "login":
             userName = donorDetails["userName"]
             password = donorDetails["password"]
