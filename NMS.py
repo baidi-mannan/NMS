@@ -41,8 +41,45 @@ def donorLogin():
 
             if donorDetails["password"] != donorDetails["rePassword"]:
                 return "<h5> THE PASSWORD DOES NOT MATCH<br> PLEASE TRY AGAIN</h5>"
-            if donorDetails["userName"] == "" or donorDetails["password"] == "":
-                return "<h5> PLEASE ENTER A VALID USERNAME OR PASSWORD</h5>"
+                
+            if len(donorDetails["password"] < 8 ):
+                return "<h5> PLEASE ENTER A PASSWORD OF LENGTH ATLEAST 8</h5>"
+            
+            u, l, n, s = 0, 0, 0, 0
+            
+            for i in donorDetails["password"]:
+                if(i.isupper()):
+                    u += 1
+                if(i.islower()):
+                    l += 1
+                if(i.isdigit()):
+                    n += 1
+                if(i == '@' or i == '$' or i == '_'):
+                    s += 1
+                    
+            if(u == 0 or l == 0 or n == 0 or s == 0):
+                return "<h5> PASSWORD MUST HAVE ATLEAST 1 UPPER CASE LETTER, 1 LOWER CASE LETTER AND 1 NUMBER</h5>"
+            
+            if(u+l+n+s != len(donorDetails["password"])):
+                return "<h5> PASSWORD MUST ONLY CONTAIN LOWER CASE, UPPER CASE, DIGIT AND ($, @, _)</h5>"
+                
+                    
+            if len(donorDetails["password"] < 8 ):
+                return "<h5> PLEASE ENTER A PASSWORD OF LENGTH ATLEAST 8</h5>"
+            
+            if(len(donorDetails["userName"]) <6):
+                return "<h5> PLEASE ENTER A USERNAME OF LENGTH ATLEAST 6</h5>"
+            
+            count = 0
+            
+            for i in donorDetails["userName"]:
+                if(i.isupper() or i.ilower() or i.isdigit or i == '_'):
+                    count += 1
+            
+            if(count != len(donorDetails["userName"])):
+                return "<h5> USERNAME MUST ONLY CONTAIN LOWER CASE, UPPER CASE, DIGIT AND UNDERSCORE ('_')</h5>"
+                
+                
             cur.execute(
                 """INSERT INTO donorList(name,email,userName,password,contactNumber) VALUES(%s,%s,%s,%s,%s)""",
                 (
