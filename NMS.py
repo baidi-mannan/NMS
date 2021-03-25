@@ -35,6 +35,16 @@ def staff_login_required(f):
             return redirect("/staff-login")
     return wrap
 
+def manager_login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if ('User' in session) and (session['User']['type']=='manager'):
+            return f(*args, **kwargs)
+        else:
+            print("You need to login first",file = sys.stderr)
+            return redirect("/manager-login")
+    return wrap
+
 @app.route("/")
 def home():
     return render_template("home.html")
@@ -109,7 +119,7 @@ def staffcheckpassword():
     password = staffDetails["password"]
     session.pop('User', None)
     mysql = mysqlcon(mydbDetails)
-    query = mysql.select(["select id,username,name,password from stafflist where username = %s",(userName,)])
+    query = mysql.select(["select id,username,name,password from stafflist where username = %s and role = %s",(userName,'staff',)])
     if(len(query)==0):
         return json.dumps({"statusCode":-1,"message":"User doesn't exist"})
     else:
@@ -133,6 +143,39 @@ def stafflogout():
     session.pop('User',None)
     return redirect("/staff-login")
     
+
+@app.route("/managercheckpassword", methods = ["POST"])
+def managercheckpassword():
+    managerDetails = request.form
+    userName = managerDetails["userName"]
+    password = managerDetails["password"]
+    session.pop('User', None)
+    mysql = mysqlcon(mydbDetails)
+    query = mysql.select(["select id,username,name,password from stafflist where username = %s and role = %s",(userName,'manager',)])
+    if(len(query)==0):
+        return json.dumps({"statusCode":-1,"message":"User doesn't exist"})
+    else:
+        if(query[0][3] == Password(password).getEncryptedPassword()):
+            session['User']={'name':query[0][2],'userName':userName,'id':query[0][0],'type':'manager'}
+
+
+            return json.dumps({"statusCode":1,"message":f"Successful Login {query[0][2]}"})
+        else:
+            return json.dumps({"statusCode":-2,"message":f"Wrong password"})
+    return json.dumps({"statusCode":1,"message":"Success"})
+
+@app.route("/managerprofilepage")
+@manager_login_required
+def managerprofilepage():
+    return f"Hello manager{session['User']['name']}"
+
+@app.route("/managerlogout")
+@manager_login_required
+def managerlogout():
+    session.pop('User',None)
+    return redirect("/manager-login")
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
