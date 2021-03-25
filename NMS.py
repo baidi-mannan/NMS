@@ -114,11 +114,11 @@ def donorLogin():
             count = 0
             
             for i in donorDetails["userName"]:
-                if(i.isupper() or i.ilower() or i.isdigit or i == '_'):
+                if(i.isupper() or i.ilower() or i.isdigit() or i == '_'):
                     count += 1
             
             if(count != len(donorDetails["userName"])):
-                return "<h5> USERNAME MUST ONLY CONTAIN LOWER CASE, UPPER CASE, DIGIT AND UNDERSCORE ('_')</h5>"
+                return "<h5> USERNAME MUST ONLY CONTAIN LOWER CASE, UPPER CASE, DIGIT AND UNDERSCORE (_)</h5>"
                 
                 
             cur.execute(
