@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session, flash, redirect
 from flask_mysqldb import MySQL
-
-
+from SupportModules import mysqlcon,Password
+from functools import wraps
+import json
+import sys
 app = Flask(__name__)
 app.config["MYSQL_USER"] = "sql6401232"
 app.config["MYSQL_PASSWORD"] = "un2P67tMei"
@@ -9,8 +11,29 @@ app.config["MYSQL_HOST"] = "sql6.freemysqlhosting.net"
 app.config["MYSQL_DB"] = "sql6401232"
 # app.config["MYSQL_CURSORCLASS"]
 
+# for session
+app.config["SECRET_KEY"] = "thisshouldbeasecret"
+
 mysql = MySQL(app)
 
+
+mydbDetails = {
+    'host':app.config["MYSQL_HOST"],
+  'user':app.config["MYSQL_USER"],
+  'password':app.config["MYSQL_PASSWORD"],
+  'database':app.config["MYSQL_DB"]
+}
+
+
+def staff_login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if ('User' in session) and (session['User']['type']=='staff'):
+            return f(*args, **kwargs)
+        else:
+            print("You need to login first",file = sys.stderr)
+            return redirect("/staff-login")
+    return wrap
 
 @app.route("/")
 def home():
@@ -79,6 +102,37 @@ def managerLogin():
 def staffLogin():
     return render_template("staffLogin.html", userType="staff")
 
+@app.route("/staffcheckpassword", methods = ["POST"])
+def staffcheckpassword():
+    staffDetails = request.form
+    userName = staffDetails["userName"]
+    password = staffDetails["password"]
+    session.pop('User', None)
+    mysql = mysqlcon(mydbDetails)
+    query = mysql.select(["select id,username,name,password from stafflist where username = %s",(userName,)])
+    if(len(query)==0):
+        return json.dumps({"statusCode":-1,"message":"User doesn't exist"})
+    else:
+        if(query[0][3] == Password(password).getEncryptedPassword()):
+            session['User']={'name':query[0][2],'userName':userName,'id':query[0][0],'type':'staff'}
+
+
+            return json.dumps({"statusCode":1,"message":f"Successful Login {query[0][2]}"})
+        else:
+            return json.dumps({"statusCode":-2,"message":f"Wrong password"})
+    return json.dumps({"statusCode":1,"message":"Success"})
+
+@app.route("/staffprofilepage")
+@staff_login_required
+def staffprofilepage():
+    return f"Hello {session['User']['name']}"
+
+@app.route("/stafflogout")
+@staff_login_required
+def stafflogout():
+    session.pop('User',None)
+    return redirect("/staff-login")
+    
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -7,3 +7,4 @@ from SupportModules.contact import Contact
 from SupportModules.password import Password
 from SupportModules.donor import Donor
 from SupportModules.mysqlconnection import mysqlcon
+from SupportModules.staff import Staff
