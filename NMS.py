@@ -64,9 +64,6 @@ def donorLogin():
                 return "<h5> PASSWORD MUST ONLY CONTAIN LOWER CASE, UPPER CASE, DIGIT AND ($, @, _)</h5>"
                 
                     
-            if len(donorDetails["password"] < 8 ):
-                return "<h5> PLEASE ENTER A PASSWORD OF LENGTH ATLEAST 8</h5>"
-            
             if(len(donorDetails["userName"]) <6):
                 return "<h5> PLEASE ENTER A USERNAME OF LENGTH ATLEAST 6</h5>"
             
