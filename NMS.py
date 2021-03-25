@@ -102,7 +102,7 @@ def donorLogin():
                     s += 1
                     
             if(u == 0 or l == 0 or n == 0 or s == 0):
-                return "<h5> PASSWORD MUST HAVE ATLEAST 1 UPPER CASE LETTER, 1 LOWER CASE LETTER AND 1 NUMBER</h5>"
+                return "<h5> PASSWORD MUST HAVE ATLEAST 1 UPPER CASE LETTER, 1 LOWER CASE LETTER, 1 SPECIAL SYMBOL ($, @, _) AND 1 DIGIT</h5>"
             
             if(u+l+n+s != len(donorDetails["password"])):
                 return "<h5> PASSWORD MUST ONLY CONTAIN LOWER CASE, UPPER CASE, DIGIT AND ($, @, _)</h5>"
