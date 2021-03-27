@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Pangolin&display=swap" rel="stylesheet"><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/donateMoney.css') }}">
+    <title>DONATE MONEY</title>
+</head>
+<body>
+      
+    <div class="body">
+        <div class="amount">
+            <h3>Choose the amount you want to donate</h3>
+
+            <form method="post" action="">
+                <input type="number" value="500" min="500"  name="amount"> 
+                <button>MAKE PAYMENT</button>
+
+            </form>
+        </div>
+
+        <div class="options">
+
+            <button onClick="document.location ='update-donor-profle'">UPDATE PROFILE</button>
+            <button type="button"onClick="document.location = 'donor-manual'">UPDATE</button>
+            <button type="button"onClick="document.location = 'donor-logout'">LOG OUT</button>
+        </div>
+
+
+    </div>
+
+    
+    
+</body>
+</html>

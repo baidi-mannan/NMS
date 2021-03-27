@@ -221,7 +221,6 @@ def managercheckpassword():
 
 
 @app.route("/managerprofilepage")
-@manager_login_required
 def managerprofilepage():
     print(f"session['User'] = {session['User']}", file=sys.stderr)
     return f"Hello manager{session['User']['name']}"
@@ -237,15 +236,39 @@ def managerlogout():
 @app.route("/donorprofilepage")
 @donor_login_required
 def donorprofilepage():
-    print(f"session['User'] = {session['User']}", file=sys.stderr)
+    # print(f"session['User'] = {session['User']}", file=sys.stderr)
     return render_template("donorProfilePage.html", Userdetails=session["User"])
 
 
-@app.route("/donorlogout")
-@donor_login_required
+@app.route("/donor-logout")
 def donorlogout():
     session.pop("User", None)
     return redirect("/donor-login")
+
+
+@app.route("/donate-money", methods=["GET", "POST"])
+def donateMoney():
+
+    if request.method == "POST":
+        amount = request.form["amount"]
+        return redirect(url_for("makePayment", amount=amount))
+
+    return render_template("donateMoney.html")
+
+
+@app.route("/make-payment", methods=["GET", "POST"])
+def makePayment():
+    amount = request.args["amount"]
+    if request.method == "POST":
+        cur = mysql.connection.cursor()
+        cur.execute(
+            """INSERT INTO funds (userName,userType,amount,status) VALUES (%s,%s, %s ,%s)""",
+            (session["User"]["userName"], session["User"]["type"], amount, 1),
+        )
+        mysql.connection.commit()
+        return "<h5>THANK YOU FOR CONTRIBUTING</h5>"
+
+    return render_template("makePayment.html")
 
 
 if __name__ == "__main__":
