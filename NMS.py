@@ -124,17 +124,17 @@ def donorLogin():
                 else:
                     return "<h5> INCORRECT PASSWORD<br> PLEASE TRY AGAIN</h5>"
 
-    return render_template("donorLogin.html", userType="donor")
+    return render_template("donor/donorLogin.html", userType="donor")
 
 
 @app.route("/manager-login")
 def managerLogin():
-    return render_template("managerLogin.html", userType="manager")
+    return render_template("manager/managerLogin.html", userType="manager")
 
 
 @app.route("/staff-login")
 def staffLogin():
-    return render_template("staffLogin.html", userType="staff")
+    return render_template("staff/staffLogin.html", userType="staff")
 
 
 @app.route("/staffcheckpassword", methods=["POST"])
@@ -237,7 +237,7 @@ def managerlogout():
 @donor_login_required
 def donorprofilepage():
     # print(f"session['User'] = {session['User']}", file=sys.stderr)
-    return render_template("donorProfilePage.html", Userdetails=session["User"])
+    return render_template("donor/donorProfilePage.html", Userdetails=session["User"])
 
 
 @app.route("/donor-logout")
@@ -253,7 +253,7 @@ def donateMoney():
         amount = request.form["amount"]
         return redirect(url_for("makePayment", amount=amount))
 
-    return render_template("donateMoney.html")
+    return render_template("donor/donateMoney.html")
 
 
 @app.route("/make-payment", methods=["GET", "POST"])
@@ -268,7 +268,7 @@ def makePayment():
         mysql.connection.commit()
         return "<h5>THANK YOU FOR CONTRIBUTING</h5>"
 
-    return render_template("makePayment.html")
+    return render_template("donor/makePayment.html")
 
 
 if __name__ == "__main__":
