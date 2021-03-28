@@ -271,5 +271,11 @@ def makePayment():
     return render_template("donor/makePayment.html")
 
 
+@app.route("/update-donor-profile", methods=["GET", "POST"])
+def updateDonorProfile():
+
+    return render_template("donor/updateDonorProfile.html", user=session["User"])
+
+
 if __name__ == "__main__":
     app.run(debug=True)
