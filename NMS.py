@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, session, flash, redirect, url_for
 from flask_mysqldb import MySQL
-from SupportModules import mysqlcon, Password, checkNewData
+from SupportModules import *
 from functools import wraps
 import json
 import sys
@@ -104,7 +104,7 @@ def donorLogin():
 
             query = mysqlc.select(
                 [
-                    "select id,userName,name,password from donorList where username = %s",
+                    "select id,userName,name,password, membership,email,contactNumber from donorList where username = %s",
                     (userName,),
                 ]
             )
@@ -114,11 +114,16 @@ def donorLogin():
             else:
                 # if(query[0][3] == Password(password).getEncryptedPassword()):
                 if query[0][3] == password:
+
                     session["User"] = {
                         "name": query[0][2],
                         "userName": userName,
                         "id": query[0][0],
                         "type": "donor",
+                        "membership": query[0][4],
+                        "email": query[0][5],
+                        "contactNumber": query[0][6],
+                        "pw": query[0][3],
                     }
                     return redirect(url_for("donorprofilepage"))
                 else:
@@ -273,6 +278,52 @@ def makePayment():
 
 @app.route("/update-donor-profile", methods=["GET", "POST"])
 def updateDonorProfile():
+    global mysql
+    cur = mysql.connection.cursor()
+
+    if request.method == "POST":
+
+        userID = session["User"]["id"]
+        if request.form["button"] == "save":
+            donorDetails = request.form
+            member = 1
+            if donorDetails["membership"] == "full":
+                member = 0
+
+            cur.execute(
+                """UPDATE donorList SET name=%s,email=%s,contactNumber=%s,membership=%s WHERE id=%s""",
+                (
+                    donorDetails["name"],
+                    donorDetails["email"],
+                    donorDetails["contactNumber"],
+                    member,
+                    userID,
+                ),
+            )
+
+            mysql.connection.commit()
+            return "<h5> USER DEATILS CHANGED</h5>"
+        if request.form["button"] == "changePassword":
+            inputs = request.form
+            if session["User"]["pw"] == inputs["oldPassword"]:
+                output = checkPassword(inputs)
+                if output["isValid"]:
+                    cur.execute(
+                        """UPDATE donorList SET password=%s WHERE id=%s""",
+                        (
+                            inputs["newPassword"],
+                            userID,
+                        ),
+                    )
+                    print(inputs["newPassword"])
+                    mysql.connection.commit()
+                    session.pop("User", None)
+                    return redirect(url_for("donorLogin"))
+
+                else:
+                    return output["message"]
+            else:
+                return "<h5>YOU HAVE ENTERED WRONG PASSWORD<br>PLEASE TRY AGAIN</h5>"
 
     return render_template("donor/updateDonorProfile.html", user=session["User"])
 
