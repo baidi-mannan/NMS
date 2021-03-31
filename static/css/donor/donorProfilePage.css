@@ -18,12 +18,12 @@ body {
         padding: 15px;
         height:90vh;
         justify-content: space-between;
-        border: 5px solid black;
+        
       }
 h1{
         height: 50px;
         font-size:50px;
-        margin: 80px 0 40px 0;
+        margin: 80px 0 10px 0;
     }  
     
     .con{
@@ -39,16 +39,20 @@ h1{
     button
     {
         cursor: pointer;
-        width:60%;
+        width:300px;
+        height: 50px;
         padding:8px;
         background-color: #fd5217;
-        font-size: 15px;
+        font-size: 18px;
+        color: floralwhite;
         box-shadow:3px 3px 5px black;
         
     }
   .options button
   {   height: 40px;
       width: 150px;
+      color: #000;
+      font-size: 15px;
   }    
   .options
   {   
@@ -57,4 +61,14 @@ h1{
       justify-content:space-between;
       align-items: center;
       height:60px;
+  }
+  .donate {
+    width: 750px;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      /* border: 2px solid black; */
+      padding: 10px;
+      margin-top: 10px;
+
   }

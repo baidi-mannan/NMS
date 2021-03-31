@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, session, flash, redirect, url_for
 from flask_mysqldb import MySQL
-from SupportModules import mysqlcon, Password, checkNewData
+from SupportModules import *
 from functools import wraps
 import json
 import sys
@@ -104,7 +104,7 @@ def donorLogin():
 
             query = mysqlc.select(
                 [
-                    "select id,userName,name,password from donorList where username = %s",
+                    "select id,userName,name,password, membership,email,contactNumber from donorList where username = %s",
                     (userName,),
                 ]
             )
@@ -114,27 +114,32 @@ def donorLogin():
             else:
                 # if(query[0][3] == Password(password).getEncryptedPassword()):
                 if query[0][3] == password:
+
                     session["User"] = {
                         "name": query[0][2],
                         "userName": userName,
                         "id": query[0][0],
                         "type": "donor",
+                        "membership": query[0][4],
+                        "email": query[0][5],
+                        "contactNumber": query[0][6],
+                        "pw": query[0][3],
                     }
                     return redirect(url_for("donorprofilepage"))
                 else:
                     return "<h5> INCORRECT PASSWORD<br> PLEASE TRY AGAIN</h5>"
 
-    return render_template("donorLogin.html", userType="donor")
+    return render_template("donor/donorLogin.html", userType="donor")
 
 
 @app.route("/manager-login")
 def managerLogin():
-    return render_template("managerLogin.html", userType="manager")
+    return render_template("manager/managerLogin.html", userType="manager")
 
 
 @app.route("/staff-login")
 def staffLogin():
-    return render_template("staffLogin.html", userType="staff")
+    return render_template("staff/staffLogin.html", userType="staff")
 
 
 @app.route("/staffcheckpassword", methods=["POST"])
@@ -221,7 +226,6 @@ def managercheckpassword():
 
 
 @app.route("/managerprofilepage")
-@manager_login_required
 def managerprofilepage():
     print(f"session['User'] = {session['User']}", file=sys.stderr)
     return f"Hello manager{session['User']['name']}"
@@ -237,15 +241,91 @@ def managerlogout():
 @app.route("/donorprofilepage")
 @donor_login_required
 def donorprofilepage():
-    print(f"session['User'] = {session['User']}", file=sys.stderr)
-    return render_template("donorProfilePage.html", Userdetails=session["User"])
+    # print(f"session['User'] = {session['User']}", file=sys.stderr)
+    return render_template("donor/donorProfilePage.html", Userdetails=session["User"])
 
 
-@app.route("/donorlogout")
-@donor_login_required
+@app.route("/donor-logout")
 def donorlogout():
     session.pop("User", None)
     return redirect("/donor-login")
+
+
+@app.route("/donate-money", methods=["GET", "POST"])
+def donateMoney():
+
+    if request.method == "POST":
+        amount = request.form["amount"]
+        return redirect(url_for("makePayment", amount=amount))
+
+    return render_template("donor/donateMoney.html")
+
+
+@app.route("/make-payment", methods=["GET", "POST"])
+def makePayment():
+    amount = request.args["amount"]
+    if request.method == "POST":
+        cur = mysql.connection.cursor()
+        cur.execute(
+            """INSERT INTO funds (userName,userType,amount,status) VALUES (%s,%s, %s ,%s)""",
+            (session["User"]["userName"], session["User"]["type"], amount, 1),
+        )
+        mysql.connection.commit()
+        return "<h5>THANK YOU FOR CONTRIBUTING</h5>"
+
+    return render_template("donor/makePayment.html")
+
+
+@app.route("/update-donor-profile", methods=["GET", "POST"])
+def updateDonorProfile():
+    global mysql
+    cur = mysql.connection.cursor()
+
+    if request.method == "POST":
+
+        userID = session["User"]["id"]
+        if request.form["button"] == "save":
+            donorDetails = request.form
+            member = 1
+            if donorDetails["membership"] == "full":
+                member = 0
+
+            cur.execute(
+                """UPDATE donorList SET name=%s,email=%s,contactNumber=%s,membership=%s WHERE id=%s""",
+                (
+                    donorDetails["name"],
+                    donorDetails["email"],
+                    donorDetails["contactNumber"],
+                    member,
+                    userID,
+                ),
+            )
+
+            mysql.connection.commit()
+            return "<h5> USER DEATILS CHANGED</h5>"
+        if request.form["button"] == "changePassword":
+            inputs = request.form
+            if session["User"]["pw"] == inputs["oldPassword"]:
+                output = checkPassword(inputs)
+                if output["isValid"]:
+                    cur.execute(
+                        """UPDATE donorList SET password=%s WHERE id=%s""",
+                        (
+                            inputs["newPassword"],
+                            userID,
+                        ),
+                    )
+                    print(inputs["newPassword"])
+                    mysql.connection.commit()
+                    session.pop("User", None)
+                    return redirect(url_for("donorLogin"))
+
+                else:
+                    return output["message"]
+            else:
+                return "<h5>YOU HAVE ENTERED WRONG PASSWORD<br>PLEASE TRY AGAIN</h5>"
+
+    return render_template("donor/updateDonorProfile.html", user=session["User"])
 
 
 if __name__ == "__main__":
