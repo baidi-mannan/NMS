@@ -20,6 +20,7 @@ app.config["MYSQL_DB"] = "coredb"
 app.config["SECRET_KEY"] = "thisshouldbeasecret"
 
 mysql = MySQL(app)
+inventory = Inventory(mysql)
 
 
 mydbDetails = {
@@ -245,17 +246,19 @@ def managerlogout():
 @app.route("/donorprofilepage")
 @donor_login_required
 def donorprofilepage():
-    # print(f"session['User'] = {session['User']}", file=sys.stderr)
+    print(f"session['User'] = {session['User']}", file=sys.stderr)
     return render_template("donor/donorProfilePage.html", Userdetails=session["User"])
 
 
 @app.route("/donor-logout")
+@donor_login_required
 def donorlogout():
     session.pop("User", None)
     return redirect("/donor-login")
 
 
 @app.route("/donate-money", methods=["GET", "POST"])
+@donor_login_required
 def donateMoney():
 
     if request.method == "POST":
@@ -266,6 +269,7 @@ def donateMoney():
 
 
 @app.route("/make-payment", methods=["GET", "POST"])
+@donor_login_required
 def makePayment():
     amount = request.args["amount"]
     if request.method == "POST":
@@ -280,7 +284,42 @@ def makePayment():
     return render_template("donor/makePayment.html")
 
 
+@app.route("/donate-item", methods=["GET", "POST"])
+@donor_login_required
+def donateItem():
+
+    if request.method == "POST":
+        global inventory
+        donation = request.form
+        print(donation,file=sys.stderr)
+        donated = False
+        donationfreq = int(donation['book'])
+        if(donationfreq>0):
+            donated = True
+            inventory.addItem(Item(ItemType['BOOK']),donationfreq)
+        donationfreq = int(donation['bag'])
+        if(donationfreq>0):
+            donated = True
+            inventory.addItem(Item(ItemType['BAG']),donationfreq)
+        donationfreq = int(donation['shoes'])
+        if(donationfreq>0):
+            donated = True
+            inventory.addItem(Item(ItemType['SHOES']),donationfreq)
+        donationfreq = int(donation['clothes'])
+        if(donationfreq>0):
+            donated = True
+            inventory.addItem(Item(ItemType['CLOTHES']),donationfreq)
+        if(donated):
+            return "<h5>Thank you your donation</h5>"
+        else:
+            return "<h5>No items donated! Please try again.</h5>"
+    if request.method == "GET":
+        return render_template("donor/donateItem.html")
+
+
+
 @app.route("/update-donor-profile", methods=["GET", "POST"])
+@donor_login_required
 def updateDonorProfile():
     global mysql
     cur = mysql.connection.cursor()
@@ -306,6 +345,11 @@ def updateDonorProfile():
             )
 
             mysql.connection.commit()
+            session["User"]["name"] = donorDetails["name"]
+            session["User"]["email"] = donorDetails["email"]
+            session["User"]["contactNumber"] = donorDetails["contactNumber"]
+            session["User"]["membership"] = member
+            session.modified = True
             return "<h5> USER DEATILS CHANGED</h5>"
         if request.form["button"] == "changePassword":
             inputs = request.form
@@ -330,23 +374,23 @@ def updateDonorProfile():
                 return "<h5>YOU HAVE ENTERED WRONG PASSWORD<br>PLEASE TRY AGAIN</h5>"
 
     if request.method == "GET":
-        tick=time.time()
-        global mysqlc 
-        # mysqlc = mysqlcon(mydbDetails)
-        query = mysqlc.select(
-                [
-                    "select id,userName,name,password, membership,email,contactNumber from donorList where username = %s",
-                    (session["User"]["userName"],),
-                ]
-            )
-        print(f"Query Took {time.time()-tick}",file=sys.stderr)
-        user={}
-        user['name']=query[0][2]
-        user['userName']=query[0][1]
-        user['email']=query[0][5]
-        user['contactNumber']=query[0][6]
-        user["membership"]=query[0][4]
-        return render_template("donor/updateDonorProfile.html", user=user)
+        # tick=time.time()
+        # global mysqlc 
+        # # mysqlc = mysqlcon(mydbDetails)
+        # query = mysqlc.select(
+        #         [
+        #             "select id,userName,name,password, membership,email,contactNumber from donorList where username = %s",
+        #             (session["User"]["userName"],),
+        #         ]
+        #     )
+        # print(f"Query Took {time.time()-tick}",file=sys.stderr)
+        # user={}
+        # user['name']=query[0][2]
+        # user['userName']=query[0][1]
+        # user['email']=query[0][5]
+        # user['contactNumber']=query[0][6]
+        # user["membership"]=query[0][4]
+        return render_template("donor/updateDonorProfile.html", user=session['User'])
     
 
 
