@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/manager/style.css') }}">
+    <title>Expenditure List</title>
+</head>
+<body>
+    <button class = "button__homepage"onClick="document.location ='managerprofilepage'">Profile Page</button> 
+    <div class="body">
+        
+        <div >
+        <h1>Expenditure List</h1>
+        </div>
+
+        {% if (query|length) != 0 %}
+        <h2>{{ (query|length) }} Row(s) found!</h2>
+        <table class = "table__class">
+            {% for name in headerName %}
+                <th class = "table__header">{{name}}</th>
+            {% endfor %}
+            {% for row in query %}
+                <tr class = "table__row">
+                    {% for data in row %}
+                        <td class = "table__cell">{{ data }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}    
+        {% else %}
+            <h2>No Expenditures till now</h2>
+        {% endif %}
+
+
+    </div>
+
+    
+</body>
+</html>

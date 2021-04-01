@@ -222,21 +222,19 @@ def managercheckpassword():
                 "type": "manager",
             }
 
-            return json.dumps(
-                {"statusCode": 1, "message": f"Successful Login {query[0][2]}"}
-            )
+            return redirect("/managerprofilepage")
         else:
             return json.dumps({"statusCode": -2, "message": f"Wrong password"})
     return json.dumps({"statusCode": 1, "message": "Success"})
 
 
 @app.route("/managerprofilepage")
+@manager_login_required
 def managerprofilepage():
-    print(f"session['User'] = {session['User']}", file=sys.stderr)
-    return f"Hello manager{session['User']['name']}"
+    return render_template("manager/managerProfilePage.html",Userdetails=session["User"])
 
 
-@app.route("/managerlogout")
+@app.route("/manager-logout")
 @manager_login_required
 def managerlogout():
     session.pop("User", None)
@@ -392,6 +390,124 @@ def updateDonorProfile():
         # user["membership"]=query[0][4]
         return render_template("donor/updateDonorProfile.html", user=session['User'])
     
+# managers code starts here
+@app.route("/manager-show-student-list")
+@manager_login_required
+def managershowstudentlist():
+    headerName = ('Name','Class','Roll Number','Last Marks','Family Income','Contact Number','Help Required(Rs.)')
+    global mysqlc
+    priceList = mysqlc.select(
+        [
+            "select itemname,price from inventory",
+            ()
+        ]
+    )
+    
+    priceDict = dict(priceList)
+    print(priceDict,file = sys.stderr)
+    query = mysqlc.select(
+        [
+            "select Name,Class,rollnumber,lastmarks,familyincome,contactnumber,(requirement_fees+%s*requirement_book + %s*requirement_bag + %s*requirement_shoes + %s*requirement_clothes)  from studentlist order by class",
+            (priceDict['BOOK'],priceDict['BAG'],priceDict['SHOES'] , priceDict['CLOTHES'],)
+        ]
+        )
+    
+    
+    print(query,file = sys.stderr)
+    
+    return render_template("manager/showStudent.html",headerName = headerName, query = query)
+
+@app.route("/manager-show-staff-list")
+@manager_login_required
+def managershowstafflist():
+    headerName = ('ID','Name','Email','Contact Number')
+    global mysqlc
+    query = mysqlc.select(
+        [
+            "select id,name,email,contactnumber from stafflist where role = 'staff'",
+            ()
+        ]
+        )
+    
+    print(query,file = sys.stderr)
+    
+    return render_template("manager/showStaff.html",headerName = headerName, query = query)
+
+
+@app.route("/manager-show-donor-list")
+@manager_login_required
+def managershowdonorlist():
+    headerName = ('ID','Name','Email','Contact Number')
+    global mysqlc
+    query = mysqlc.select(
+        [
+            "select id,name,email,contactnumber from donorList",
+            ()
+        ]
+        )
+    
+    print(query,file = sys.stderr)
+    
+    return render_template("manager/showStaff.html",headerName = headerName, query = query)
+
+
+
+
+@app.route("/manager-show-funds")
+@manager_login_required
+def managershowfunds():
+    global mysqlc
+    query = mysqlc.select(
+        [
+            "SELECT sum(IF(`status`=1, `amount`, 0))-sum(IF(`status`=0, `amount`, 0)) AS    `Balance` FROM   funds",
+            ()
+        ]
+        )
+    
+    print(query,file = sys.stderr)
+    
+    return render_template("manager/showFunds.html",BalanceFund = query[0][0])
+
+
+@app.route("/manager-show-inventory-list")
+@manager_login_required
+def managershowinventorylist():
+    headerName = ('Item Name','Available Units','Unit Price')
+    global mysqlc
+    query = mysqlc.select(
+        [
+            "select itemname,frequency,price from inventory order by itemid",
+            ()
+        ]
+        )
+    
+    print(query,file = sys.stderr)
+    
+    return render_template("manager/showInventory.html",headerName = headerName, query = query)
+
+
+@app.route("/manager-show-expenditures")
+@manager_login_required
+def managershowexpenditures():
+    headerName = ('User Name','Amount (Rs.)')
+    global mysqlc
+    query = mysqlc.select(
+        [
+            "select userName,amount from funds where status = 0 order by id",
+            ()
+        ]
+        )
+    
+    print(query,file = sys.stderr)
+    
+    return render_template("manager/showExpenditures.html",headerName = headerName, query = query)
+
+
+
+@app.route("/manager-check-records")
+@manager_login_required
+def managercheckrecords():
+    return render_template("manager/managerCheckRecords.html")
 
 
 if __name__ == "__main__":
