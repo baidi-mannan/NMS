@@ -4,12 +4,16 @@ from SupportModules import *
 from functools import wraps
 import json
 import sys
-
+import time 
 app = Flask(__name__)
-app.config["MYSQL_USER"] = "sql6401232"
-app.config["MYSQL_PASSWORD"] = "un2P67tMei"
-app.config["MYSQL_HOST"] = "sql6.freemysqlhosting.net"
-app.config["MYSQL_DB"] = "sql6401232"
+# app.config["MYSQL_USER"] = "sql6401232"
+# app.config["MYSQL_PASSWORD"] = "un2P67tMei"
+# app.config["MYSQL_HOST"] = "sql6.freemysqlhosting.net"
+# app.config["MYSQL_DB"] = "sql6401232"
+app.config["MYSQL_USER"] = "admin"
+app.config["MYSQL_PASSWORD"] = "nmszka323"
+app.config["MYSQL_HOST"] = "nmsdb.czj2xnercmna.us-east-2.rds.amazonaws.com"
+app.config["MYSQL_DB"] = "coredb"
 # app.config["MYSQL_CURSORCLASS"]
 
 # for session
@@ -24,6 +28,7 @@ mydbDetails = {
     "password": app.config["MYSQL_PASSWORD"],
     "database": app.config["MYSQL_DB"],
 }
+mysqlc = mysqlcon(mydbDetails)
 
 
 def staff_login_required(f):
@@ -74,8 +79,7 @@ def donorLogin():
 
     if request.method == "POST":
         donorDetails = request.form
-        mysqlc = mysqlcon(mydbDetails)
-
+        global mysqlc
         if request.form["button"] == "register":
             donorUserNames = mysqlc.userNameList("SELECT userName FROM donorList")
             result = checkNewData(donorDetails, donorUserNames)
@@ -148,7 +152,7 @@ def staffcheckpassword():
     userName = staffDetails["userName"]
     password = staffDetails["password"]
     session.pop("User", None)
-    mysqlc = mysqlcon(mydbDetails)
+    global mysqlc
     query = mysqlc.select(
         [
             "select id,username,name,password from stafflist where username = %s and role = %s",
@@ -196,7 +200,7 @@ def managercheckpassword():
     userName = managerDetails["userName"]
     password = managerDetails["password"]
     session.pop("User", None)
-    mysqlc = mysqlcon(mydbDetails)
+    global mysqlc 
     query = mysqlc.select(
         [
             "select id,username,name,password from stafflist where username = %s and role = %s",
@@ -325,7 +329,25 @@ def updateDonorProfile():
             else:
                 return "<h5>YOU HAVE ENTERED WRONG PASSWORD<br>PLEASE TRY AGAIN</h5>"
 
-    return render_template("donor/updateDonorProfile.html", user=session["User"])
+    if request.method == "GET":
+        tick=time.time()
+        global mysqlc 
+        # mysqlc = mysqlcon(mydbDetails)
+        query = mysqlc.select(
+                [
+                    "select id,userName,name,password, membership,email,contactNumber from donorList where username = %s",
+                    (session["User"]["userName"],),
+                ]
+            )
+        print(f"Query Took {time.time()-tick}",file=sys.stderr)
+        user={}
+        user['name']=query[0][2]
+        user['userName']=query[0][1]
+        user['email']=query[0][5]
+        user['contactNumber']=query[0][6]
+        user["membership"]=query[0][4]
+        return render_template("donor/updateDonorProfile.html", user=user)
+    
 
 
 if __name__ == "__main__":
