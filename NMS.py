@@ -517,6 +517,7 @@ def managerupdatepricelist():
     # do some query 
     newPriceForm = request.form
     if request.method == "POST":
+        # return request.form
         newPrice= {
             'BOOK':newPriceForm['BookPrice'],
             'BAG':newPriceForm['BagPrice'],
@@ -585,6 +586,45 @@ def managerbuyresultpage():
 def managercheckrecords():
     return render_template("manager/managerCheckRecords.html")
 
+
+@app.route("/update-manager-profile",methods=["GET","POST"])
+@manager_login_required
+def updatemanagerprofile():
+    global mysqlc
+    query = mysqlc.select(
+        [
+            "select name,email,contactnumber,password from stafflist where username = %s",
+            (session['User']['userName'],)
+        ]
+    )
+
+    user = {
+        'name': query[0][0],
+        'userName': session['User']['userName'],
+        'email': query[0][1],
+        'phone':query [0][2]
+    }
+    
+    if request.method == "POST":
+        # return request.form
+        if request.form['formName'] == "changePassword":
+            manager = Manager(user['name'],user['userName'],Contact(user['email'],user['phone']),query[0][3],True)
+            slqandval = manager.checkAndUpdatePasswordsqlandvalues(request.form['oldPassword'],request.form['newPassword'])
+            mysqlc.exeandcommit(slqandval)
+            print((request.form['newPassword'],slqandval),file =sys.stderr)
+            if(slqandval is not False):
+                return redirect(url_for('managerlogout'))
+            else:
+                return "Wrong Password"
+        if request.form['formName'] == "updateProfile":
+            userInfo = request.form
+            manager = Manager(userInfo['name'],user['userName'],Contact(userInfo['email'],userInfo['phone']),query[0][3],True)
+            mysqlc.exeandcommit(manager.updateInfosqlandvalues())
+            session["User"]["name"] = userInfo["name"]
+            session.modified = True
+            return redirect(url_for('managerprofilepage'))
+            
+    return render_template("manager/updateManagerProfile.html",user=user)
 
 if __name__ == "__main__":
     app.run(debug=True)
