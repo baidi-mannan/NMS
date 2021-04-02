@@ -276,6 +276,7 @@ def makePayment():
             """INSERT INTO funds (userName,userType,amount,status) VALUES (%s,%s, %s ,%s)""",
             (session["User"]["userName"], session["User"]["type"], amount, 1),
         )
+        #cur.execute("commit")
         mysql.connection.commit()
         return "<h5>THANK YOU FOR CONTRIBUTING</h5>"
 
@@ -448,7 +449,7 @@ def managershowdonorlist():
     
     print(query,file = sys.stderr)
     
-    return render_template("manager/showStaff.html",headerName = headerName, query = query)
+    return render_template("manager/showDonor.html",headerName = headerName, query = query)
 
 
 
@@ -489,11 +490,11 @@ def managershowinventorylist():
 @app.route("/manager-show-expenditures")
 @manager_login_required
 def managershowexpenditures():
-    headerName = ('User Name','Amount (Rs.)')
+    headerName = ('User Name','Amount (Rs.)','Remarks')
     global mysqlc
     query = mysqlc.select(
         [
-            "select userName,amount from funds where status = 0 order by id",
+            "select userName,amount,tranmessage from funds where status = 1 order by id",
             ()
         ]
         )
@@ -502,7 +503,12 @@ def managershowexpenditures():
     
     return render_template("manager/showExpenditures.html",headerName = headerName, query = query)
 
-
+@app.route("/manager-show-requirement")
+@manager_login_required
+def managershowrequirement():
+    req = Requirement(mysql)
+    headerName,query = req()  
+    return render_template("manager/showRequirement.html",headerName = headerName, query = query)
 
 @app.route("/manager-check-records")
 @manager_login_required
@@ -511,4 +517,5 @@ def managercheckrecords():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # app.run(debug=True)
+    app.run(debug=True,host='192.168.0.105')
