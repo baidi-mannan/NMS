@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/manager/style.css') }}">
+    <title>Price List</title>
+</head>
+<body>
+    
+    <button class = "button__homepage"onClick="document.location ='managerprofilepage'">Profile Page</button>   
+    
+    <div class="body">
+        <h2> Update Price List</h2>
+<form method="post" action="">
+
+    
+   
+    <div class= "form__div">
+        <label for="ClothesPrice">Book Price:</label><br>
+    <input class="form__input"type="number" id= "BookPrice" name="BookPrice" value="{{oldprice['BOOK']}}" min =0>
+    </div>
+    <div class= "form__div">
+        <label for="ClothesPrice">Bag Price:</label><br>
+    <input class="form__input" type="number" id = "BagPrice" name="BagPrice" value="{{oldprice['BAG']}}" min =0>
+    </div>
+    <div class= "form__div">
+        <label for="ClothesPrice">Shoes Price:</label><br>
+    <input class="form__input" type="number" id = "ShoesPrice" name ="ShoesPrice" value="{{oldprice['SHOES']}}" min =0>
+    </div>
+    <div class= "form__div">
+    <label for="ClothesPrice">Clothes Price:</label><br>
+    <input class="form__input" type="number" id = "ClothesPrice"name ="ClothesPrice" value="{{oldprice['CLOTHES']}}" min =0>
+    </div>
+   
+
+    
+    
+     <button name="button" class= "form__button"type="submit" value="save" cl> Save Changes</button>  
+    
+</form>
+    {% if saved %}
+        <br>
+        <h2> Successfully Saved</h2>
+        <br>
+    {% endif %}
+    </div>
+
+    
+</body>
+</html>

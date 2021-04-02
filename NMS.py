@@ -510,6 +510,32 @@ def managershowrequirement():
     headerName,query = req()  
     return render_template("manager/showRequirement.html",headerName = headerName, query = query)
 
+@app.route("/manager-update-price-list", methods=["GET", "POST"])
+@manager_login_required
+def managerupdatepricelist():
+    # do some query 
+    newPriceForm = request.form
+    if request.method == "POST":
+        newPrice= {
+            'BOOK':newPriceForm['BookPrice'],
+            'BAG':newPriceForm['BagPrice'],
+            'SHOES':newPriceForm['ShoesPrice'],
+            'CLOTHES':newPriceForm['ClothesPrice'],
+        }
+        global inventory
+        inventory.UpdatePriceList(newPrice)
+        return render_template("manager/managerUpdatePrice.html",oldprice = newPrice,saved=True)
+    if request.method == "GET":
+        global mysqlc
+        priceList = mysqlc.select(
+            [
+                "select itemname,price from inventory",
+                ()
+            ]
+        )
+        priceDict = dict(priceList)
+        return render_template("manager/managerUpdatePrice.html",oldprice = priceDict,saved=False)
+
 @app.route("/manager-check-records")
 @manager_login_required
 def managercheckrecords():
@@ -517,5 +543,4 @@ def managercheckrecords():
 
 
 if __name__ == "__main__":
-    # app.run(debug=True)
-    app.run(debug=True,host='192.168.0.105')
+    app.run(debug=True)
