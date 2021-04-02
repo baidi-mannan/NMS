@@ -75,3 +75,14 @@ class Inventory:
         if(self.debug):
             print(f"Time taken to update Price {time.time() - tick}",file = sys.stderr)
         return self.cursor.rowcount
+    def AddMultiple(self, freq:dict):
+        # need perfect key as itemname
+        tick = time.time()
+        listOfTuples = [(v,k) for k,v in freq.items()]
+        stmt = """update inventory SET frequency = %s + frequency where itemname = %s"""
+        self.cursor = self.mysql.connection.cursor()
+        self.cursor.executemany(stmt,listOfTuples)
+        self.mysql.connection.commit()
+        if(self.debug):
+            print(f"Time taken to update Price {time.time() - tick}",file = sys.stderr)
+        return self.cursor.rowcount

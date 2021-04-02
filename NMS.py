@@ -21,6 +21,7 @@ app.config["SECRET_KEY"] = "thisshouldbeasecret"
 
 mysql = MySQL(app)
 inventory = Inventory(mysql)
+ngobank = NgoBank(mysql)
 
 
 mydbDetails = {
@@ -494,7 +495,7 @@ def managershowexpenditures():
     global mysqlc
     query = mysqlc.select(
         [
-            "select userName,amount,tranmessage from funds where status = 1 order by id",
+            "select userName,amount,tranmessage from funds where status = 0 order by id",
             ()
         ]
         )
@@ -535,6 +536,49 @@ def managerupdatepricelist():
         )
         priceDict = dict(priceList)
         return render_template("manager/managerUpdatePrice.html",oldprice = priceDict,saved=False)
+
+
+@app.route("/manager-buy-item",methods=["GET", "POST"])
+@manager_login_required
+def managerbuyitem():
+    global mysqlc
+    priceList = mysqlc.select(
+        [
+            "select itemname,price from inventory",
+            ()
+        ]
+    )
+    priceDict = dict(priceList)
+    global inventory
+    global ngobank
+    funds = ngobank.getFunds()
+    if request.method == "POST":
+        orderForm = request.form
+        orderRequiredAmount = 0
+        for k,v in priceDict.items():
+            orderRequiredAmount+=(v*(int(orderForm[k])))
+        if(funds<orderRequiredAmount):
+            return redirect(url_for("managerbuyresultpage",bamount = orderRequiredAmount, status= -1, funds = funds))
+            # return render_template("manager/managerBuyItem.html",priceDict = priceDict,status = -1,bamount = orderRequiredAmount, funds= funds)
+        if(orderRequiredAmount <=0 ):
+            return redirect(url_for("managerbuyresultpage",bamount = orderRequiredAmount, status= -2, funds = funds))
+            # return render_template("manager/managerBuyItem.html",priceDict = priceDict,status = -2,bamount = orderRequiredAmount, funds= funds)
+        print(orderForm, file= sys.stderr)
+        inventory.AddMultiple(orderForm)
+        ngobank.withdraw(session['User']['userName'],'manager',orderRequiredAmount,'Bought Items for NGO')
+        return redirect(url_for("managerbuyresultpage",bamount = orderRequiredAmount, status= 1, funds = funds - orderRequiredAmount))
+        # return render_template("manager/managerBuyItem.html",priceDict = priceDict,status = 1,bamount = orderRequiredAmount, funds = funds - orderRequiredAmount)
+    if request.method == "GET":
+        return render_template("manager/managerBuyItem.html",priceDict = priceDict,status = 0, funds = funds)
+
+@app.route("/managerbuyresultpage")
+@manager_login_required
+def managerbuyresultpage():
+    status = request.args.get('status')
+    bamount = request.args.get('bamount')
+    funds = request.args.get('funds')
+    return render_template("manager/managerBuyResultPage.html",**request.args)
+
 
 @app.route("/manager-check-records")
 @manager_login_required

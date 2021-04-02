@@ -20,15 +20,15 @@
     
    
     <div class= "form__div">
-        <label for="ClothesPrice">Book Price:</label><br>
+        <label for="BookPrice">Book Price:</label><br>
     <input class="form__input"type="number" id= "BookPrice" name="BookPrice" value="{{oldprice['BOOK']}}" min =0>
     </div>
     <div class= "form__div">
-        <label for="ClothesPrice">Bag Price:</label><br>
+        <label for="BagPrice">Bag Price:</label><br>
     <input class="form__input" type="number" id = "BagPrice" name="BagPrice" value="{{oldprice['BAG']}}" min =0>
     </div>
     <div class= "form__div">
-        <label for="ClothesPrice">Shoes Price:</label><br>
+        <label for="ShoesPrice">Shoes Price:</label><br>
     <input class="form__input" type="number" id = "ShoesPrice" name ="ShoesPrice" value="{{oldprice['SHOES']}}" min =0>
     </div>
     <div class= "form__div">
@@ -39,7 +39,7 @@
 
     
     
-     <button name="button" class= "form__button"type="submit" value="save" cl> Save Changes</button>  
+     <button name="button" class= "form__button"type="submit" onClick="this.form.submit(); this.disabled=true; this.innerText='Saving…'; "value="save" > Save Changes</button>  
     
 </form>
     {% if saved %}
