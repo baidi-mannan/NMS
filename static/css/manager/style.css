@@ -1,0 +1,120 @@
+body {
+    color: floralwhite;
+    margin: 0;
+    font-family: 'Raleway', sans-serif;
+    background-color: #2c2f33;
+    user-select: none;
+    width:95%;
+  }
+  *{
+    font-family: 'Raleway', sans-serif;
+  
+ } 
+.body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        vertical-align: bottom;
+        width: 95vw;
+        padding: 15px;
+        justify-content: space-between;
+        
+      }
+h1{
+        height: 50px;
+        font-size:50px;
+        margin: 80px 0 10px 0;
+    }  
+    
+    .con{
+        height: 250px;
+        font-size: 25px;
+        width: 550px;
+        display: flex;
+        flex-direction: column;
+        vertical-align: bottom;
+        align-items: center;
+        justify-content:space-around;
+        
+    }
+    button
+    {
+        cursor: pointer;
+        width:300px;
+        height: 50px;
+        padding:8px;
+        background-color: #fd5217;
+        font-size: 18px;
+        color: floralwhite;
+        box-shadow:3px 3px 5px black;
+        
+    }
+    .button__homepage
+    {
+        background-color: rgb(19, 1, 90);
+        vertical-align:top;
+        color: white;
+        height: fit-content;
+        width: 15%;
+        font-size: small;
+        border-radius: 100%;
+        transition-duration: .4s;
+        border: none;
+        
+    }
+    .button__homepage:hover
+    {
+        /* border-radius: 0; */
+        background-color: rgb(54, 36, 93);
+       
+    }
+  
+  .options
+  {   
+      width: 100%;
+      display: flex;
+      justify-content:space-between;
+      align-items: center;
+      height:auto;
+  }
+  .options button
+  {   height: 80px;
+      width: 200px; ;
+      color: whitesmoke;
+      font-size: 15px;
+      transition: 0.2s;
+  }
+  .options button:hover
+  {
+      background-color: rgb(12, 181, 121);
+      color: aliceblue;
+  }    
+.table__class{
+    font-family: inherit;
+    width: 50%;
+    align-self: center;
+    font-size: inherit;
+    border-spacing: 0px;
+    background-color: white;
+    color: black;
+}
+.table__header{
+    text-align: left;
+}
+.table__row{
+    transition: 0.2s;
+}
+.table__row:nth-child(even){
+    background-color: floralwhite;
+}
+.table__cell{
+    border: 1px solid #032f5b;
+    text-align: center;
+    padding: 3px;
+    
+}
+.table__row:hover
+{
+    background-color: rgb(104, 24, 202);
+    color: aliceblue;
+}

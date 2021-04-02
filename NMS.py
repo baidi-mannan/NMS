@@ -4,18 +4,23 @@ from SupportModules import *
 from functools import wraps
 import json
 import sys
-
+import time 
 app = Flask(__name__)
-app.config["MYSQL_USER"] = "sql6401232"
-app.config["MYSQL_PASSWORD"] = "un2P67tMei"
-app.config["MYSQL_HOST"] = "sql6.freemysqlhosting.net"
-app.config["MYSQL_DB"] = "sql6401232"
+# app.config["MYSQL_USER"] = "sql6401232"
+# app.config["MYSQL_PASSWORD"] = "un2P67tMei"
+# app.config["MYSQL_HOST"] = "sql6.freemysqlhosting.net"
+# app.config["MYSQL_DB"] = "sql6401232"
+app.config["MYSQL_USER"] = "admin"
+app.config["MYSQL_PASSWORD"] = "nmszka323"
+app.config["MYSQL_HOST"] = "nmsdb.czj2xnercmna.us-east-2.rds.amazonaws.com"
+app.config["MYSQL_DB"] = "coredb"
 # app.config["MYSQL_CURSORCLASS"]
 
 # for session
 app.config["SECRET_KEY"] = "thisshouldbeasecret"
 
 mysql = MySQL(app)
+inventory = Inventory(mysql)
 
 
 mydbDetails = {
@@ -24,6 +29,7 @@ mydbDetails = {
     "password": app.config["MYSQL_PASSWORD"],
     "database": app.config["MYSQL_DB"],
 }
+mysqlc = mysqlcon(mydbDetails)
 
 
 def staff_login_required(f):
@@ -74,8 +80,7 @@ def donorLogin():
 
     if request.method == "POST":
         donorDetails = request.form
-        mysqlc = mysqlcon(mydbDetails)
-
+        global mysqlc
         if request.form["button"] == "register":
             donorUserNames = mysqlc.userNameList("SELECT userName FROM donorList")
             result = checkNewData(donorDetails, donorUserNames)
@@ -148,7 +153,7 @@ def staffcheckpassword():
     userName = staffDetails["userName"]
     password = staffDetails["password"]
     session.pop("User", None)
-    mysqlc = mysqlcon(mydbDetails)
+    global mysqlc
     query = mysqlc.select(
         [
             "select id,username,name,password from stafflist where username = %s and role = %s",
@@ -196,7 +201,7 @@ def managercheckpassword():
     userName = managerDetails["userName"]
     password = managerDetails["password"]
     session.pop("User", None)
-    mysqlc = mysqlcon(mydbDetails)
+    global mysqlc 
     query = mysqlc.select(
         [
             "select id,username,name,password from stafflist where username = %s and role = %s",
@@ -217,21 +222,19 @@ def managercheckpassword():
                 "type": "manager",
             }
 
-            return json.dumps(
-                {"statusCode": 1, "message": f"Successful Login {query[0][2]}"}
-            )
+            return redirect("/managerprofilepage")
         else:
             return json.dumps({"statusCode": -2, "message": f"Wrong password"})
     return json.dumps({"statusCode": 1, "message": "Success"})
 
 
 @app.route("/managerprofilepage")
+@manager_login_required
 def managerprofilepage():
-    print(f"session['User'] = {session['User']}", file=sys.stderr)
-    return f"Hello manager{session['User']['name']}"
+    return render_template("manager/managerProfilePage.html",Userdetails=session["User"])
 
 
-@app.route("/managerlogout")
+@app.route("/manager-logout")
 @manager_login_required
 def managerlogout():
     session.pop("User", None)
@@ -241,17 +244,19 @@ def managerlogout():
 @app.route("/donorprofilepage")
 @donor_login_required
 def donorprofilepage():
-    # print(f"session['User'] = {session['User']}", file=sys.stderr)
+    print(f"session['User'] = {session['User']}", file=sys.stderr)
     return render_template("donor/donorProfilePage.html", Userdetails=session["User"])
 
 
 @app.route("/donor-logout")
+@donor_login_required
 def donorlogout():
     session.pop("User", None)
     return redirect("/donor-login")
 
 
 @app.route("/donate-money", methods=["GET", "POST"])
+@donor_login_required
 def donateMoney():
 
     if request.method == "POST":
@@ -262,6 +267,7 @@ def donateMoney():
 
 
 @app.route("/make-payment", methods=["GET", "POST"])
+@donor_login_required
 def makePayment():
     amount = request.args["amount"]
     if request.method == "POST":
@@ -276,7 +282,42 @@ def makePayment():
     return render_template("donor/makePayment.html")
 
 
+@app.route("/donate-item", methods=["GET", "POST"])
+@donor_login_required
+def donateItem():
+
+    if request.method == "POST":
+        global inventory
+        donation = request.form
+        print(donation,file=sys.stderr)
+        donated = False
+        donationfreq = int(donation['book'])
+        if(donationfreq>0):
+            donated = True
+            inventory.addItem(Item(ItemType['BOOK']),donationfreq)
+        donationfreq = int(donation['bag'])
+        if(donationfreq>0):
+            donated = True
+            inventory.addItem(Item(ItemType['BAG']),donationfreq)
+        donationfreq = int(donation['shoes'])
+        if(donationfreq>0):
+            donated = True
+            inventory.addItem(Item(ItemType['SHOES']),donationfreq)
+        donationfreq = int(donation['clothes'])
+        if(donationfreq>0):
+            donated = True
+            inventory.addItem(Item(ItemType['CLOTHES']),donationfreq)
+        if(donated):
+            return "<h5>Thank you your donation</h5>"
+        else:
+            return "<h5>No items donated! Please try again.</h5>"
+    if request.method == "GET":
+        return render_template("donor/donateItem.html")
+
+
+
 @app.route("/update-donor-profile", methods=["GET", "POST"])
+@donor_login_required
 def updateDonorProfile():
     global mysql
     cur = mysql.connection.cursor()
@@ -302,6 +343,11 @@ def updateDonorProfile():
             )
 
             mysql.connection.commit()
+            session["User"]["name"] = donorDetails["name"]
+            session["User"]["email"] = donorDetails["email"]
+            session["User"]["contactNumber"] = donorDetails["contactNumber"]
+            session["User"]["membership"] = member
+            session.modified = True
             return "<h5> USER DEATILS CHANGED</h5>"
         if request.form["button"] == "changePassword":
             inputs = request.form
@@ -325,7 +371,143 @@ def updateDonorProfile():
             else:
                 return "<h5>YOU HAVE ENTERED WRONG PASSWORD<br>PLEASE TRY AGAIN</h5>"
 
-    return render_template("donor/updateDonorProfile.html", user=session["User"])
+    if request.method == "GET":
+        # tick=time.time()
+        # global mysqlc 
+        # # mysqlc = mysqlcon(mydbDetails)
+        # query = mysqlc.select(
+        #         [
+        #             "select id,userName,name,password, membership,email,contactNumber from donorList where username = %s",
+        #             (session["User"]["userName"],),
+        #         ]
+        #     )
+        # print(f"Query Took {time.time()-tick}",file=sys.stderr)
+        # user={}
+        # user['name']=query[0][2]
+        # user['userName']=query[0][1]
+        # user['email']=query[0][5]
+        # user['contactNumber']=query[0][6]
+        # user["membership"]=query[0][4]
+        return render_template("donor/updateDonorProfile.html", user=session['User'])
+    
+# managers code starts here
+@app.route("/manager-show-student-list")
+@manager_login_required
+def managershowstudentlist():
+    headerName = ('Name','Class','Roll Number','Last Marks','Family Income','Contact Number','Help Required(Rs.)')
+    global mysqlc
+    priceList = mysqlc.select(
+        [
+            "select itemname,price from inventory",
+            ()
+        ]
+    )
+    
+    priceDict = dict(priceList)
+    print(priceDict,file = sys.stderr)
+    query = mysqlc.select(
+        [
+            "select Name,Class,rollnumber,lastmarks,familyincome,contactnumber,(requirement_fees+%s*requirement_book + %s*requirement_bag + %s*requirement_shoes + %s*requirement_clothes)  from studentlist order by class",
+            (priceDict['BOOK'],priceDict['BAG'],priceDict['SHOES'] , priceDict['CLOTHES'],)
+        ]
+        )
+    
+    
+    print(query,file = sys.stderr)
+    
+    return render_template("manager/showStudent.html",headerName = headerName, query = query)
+
+@app.route("/manager-show-staff-list")
+@manager_login_required
+def managershowstafflist():
+    headerName = ('ID','Name','Email','Contact Number')
+    global mysqlc
+    query = mysqlc.select(
+        [
+            "select id,name,email,contactnumber from stafflist where role = 'staff'",
+            ()
+        ]
+        )
+    
+    print(query,file = sys.stderr)
+    
+    return render_template("manager/showStaff.html",headerName = headerName, query = query)
+
+
+@app.route("/manager-show-donor-list")
+@manager_login_required
+def managershowdonorlist():
+    headerName = ('ID','Name','Email','Contact Number')
+    global mysqlc
+    query = mysqlc.select(
+        [
+            "select id,name,email,contactnumber from donorList",
+            ()
+        ]
+        )
+    
+    print(query,file = sys.stderr)
+    
+    return render_template("manager/showStaff.html",headerName = headerName, query = query)
+
+
+
+
+@app.route("/manager-show-funds")
+@manager_login_required
+def managershowfunds():
+    global mysqlc
+    query = mysqlc.select(
+        [
+            "SELECT sum(IF(`status`=1, `amount`, 0))-sum(IF(`status`=0, `amount`, 0)) AS    `Balance` FROM   funds",
+            ()
+        ]
+        )
+    
+    print(query,file = sys.stderr)
+    
+    return render_template("manager/showFunds.html",BalanceFund = query[0][0])
+
+
+@app.route("/manager-show-inventory-list")
+@manager_login_required
+def managershowinventorylist():
+    headerName = ('Item Name','Available Units','Unit Price')
+    global mysqlc
+    query = mysqlc.select(
+        [
+            "select itemname,frequency,price from inventory order by itemid",
+            ()
+        ]
+        )
+    
+    print(query,file = sys.stderr)
+    
+    return render_template("manager/showInventory.html",headerName = headerName, query = query)
+
+
+@app.route("/manager-show-expenditures")
+@manager_login_required
+def managershowexpenditures():
+    headerName = ('User Name','Amount (Rs.)')
+    global mysqlc
+    query = mysqlc.select(
+        [
+            "select userName,amount from funds where status = 0 order by id",
+            ()
+        ]
+        )
+    
+    print(query,file = sys.stderr)
+    
+    return render_template("manager/showExpenditures.html",headerName = headerName, query = query)
+
+
+
+@app.route("/manager-check-records")
+@manager_login_required
+def managercheckrecords():
+    return render_template("manager/managerCheckRecords.html")
 
 
 if __name__ == "__main__":

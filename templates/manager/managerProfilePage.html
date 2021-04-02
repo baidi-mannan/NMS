@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/manager/managerProfilePage.css') }}">
+    <title>Donor Profile</title>
+</head>
+<body>
+    
+    <div class="body">
+        
+        <div >
+        <h1>Welcome Back,Manager {{Userdetails["name"]}}</h1>
+        </div>
+
+        <div class="con">
+        <h3>Please choose among the following options</h3>
+        <div class="donate">
+        <button onClick="document.location ='donate-money'">DONOTE MONEY</button>
+        <button type="button"onClick="document.location ='manager-check-records'">Check Records</button>
+        <button type="button"onClick="document.location = 'donate-item'">DONOTE ITEM</button>
+        </div>
+        </div>
+        <div class="options">
+
+            <button onClick="document.location ='update-manager-profile'">UPDATE PROFILE</button>
+            <button type="button"onClick="document.location = 'manager-manual'">USER MANUAL</button>
+            <button type="button"onClick="document.location = 'manager-logout'">LOG OUT</button>
+        </div>
+        
+
+
+    </div>
+
+    
+</body>
+</html>
