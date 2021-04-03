@@ -1,7 +1,7 @@
 class Requirement:
     def __init__(self, mysql):
         self.mysql = mysql
-    def __call__(self):
+    def __call__(self,forPrinting = True):
         cur = self.mysql.connection.cursor()
         cur.execute(
             "select itemname,price from inventory",
@@ -74,8 +74,73 @@ class Requirement:
         myTable.append(row)
 
         headerName = ["Particulars", "Required","Available","Amount Required"]
+        if (forPrinting):
+            return headerName, myTable
+        else:
+            myDict = {}
+            totalAmount = 0
+            myDict['FEES'] = {
+                'REQ':requirements[0]
+            }
+            totalAmount += requirements[0]
+            
+            #BOOK
+            reqPrice = 0
+            freqItem = 0
+            if requirements[1] > freqDict['BOOK'] :
+                freqItem = requirements[1]-freqDict['BOOK']
+                reqPrice = (requirements[1]-freqDict['BOOK'])*priceDict['BOOK']
+            myDict['BOOK'] = {
+                'FREQ_REQUIRED':requirements[1],
+                'FREQ':freqDict['BOOK'],
+                'REQ':reqPrice
+            }
+            totalAmount += reqPrice
 
-        return headerName, myTable
+            #BAG
+            reqPrice = 0
+            freqItem = 0
+            if requirements[2] > freqDict['BAG'] :
+                freqItem = (requirements[2]-freqDict['BAG'])
+                reqPrice = (requirements[2]-freqDict['BAG'])*priceDict['BAG']
+            myDict['BAG'] = {
+                'FREQ_REQUIRED':requirements[2],
+                'FREQ':freqDict['BAG'],
+                'REQ':reqPrice
+            }  
+            
+            totalAmount += reqPrice
+
+            #SHOES
+            reqPrice = 0
+            freqItem = 0
+            if requirements[3] > freqDict['SHOES'] :
+                freqItem = (requirements[3]-freqDict['SHOES'])
+                reqPrice = (requirements[3]-freqDict['SHOES'])*priceDict['SHOES']
+            myDict['SHOES'] = {
+                'FREQ_REQUIRED':requirements[3],
+                'FREQ':freqDict['SHOES'],
+                'REQ':reqPrice
+            }  
+            
+            totalAmount += reqPrice
+
+            #CLOTHES
+            reqPrice = 0
+            freqItem = 0
+            if requirements[4] > freqDict['CLOTHES'] :
+                freqItem = (requirements[4]-freqDict['CLOTHES'])
+                reqPrice = (requirements[4]-freqDict['CLOTHES'])*priceDict['CLOTHES']
+            myDict['CLOTHES'] = {
+                'FREQ_REQUIRED':requirements[4],
+                'FREQ':freqDict['CLOTHES'],
+                'REQ':reqPrice
+            }  
+            
+            totalAmount += reqPrice
+            #FINAL row Total Amount
+            myDict['REQ'] = totalAmount
+            return myDict
 
 
         

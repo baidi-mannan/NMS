@@ -7,28 +7,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Raleway&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/manager/style.css') }}">
-    <title>{{ title }} List</title>
+    <title>Help List</title>
 </head>
 <body>
     <button class = "button__homepage"onClick="document.location ='managerprofilepage'">Profile Page</button> 
-    <br>
-    
-    <form class = "form__chooseList"name = "chooseForm" method="POST" action="" onsubmit="var myElement = document.getElementById('chooseFormButton'); myElement.innerText = 'Choosing ...'">
-        <select name="type">
-                <option value="Expenditures"selected>Expenditures</option>
-                <option value="Income">Income</option>
-        </select>
-        <button name = formName id = 'chooseFormButton' type="submit" value="chooseForm">Choose</button>
-    </form>
-
     <div class="body">
         
         <div >
-        <h1>{{ title }} List</h1>
+        <h1>Help List</h1><br>
+        {% if donationid != None  %}
+        <h2>Current Donation id {{ donationid }}</h1>
+        {% endif %}
         </div>
 
         {% if (query|length) != 0 %}
-        <h2>{{ (query|length) }} Row(s) found!</h2>
+        <h2>{{ (query|length) }} Help(s) found!</h2>
         <table class = "table__class">
             {% for name in headerName %}
                 <th class = "table__header">{{name}}</th>
@@ -41,7 +34,7 @@
                 </tr>
             {% endfor %}    
         {% else %}
-            <h2>No {{ title }} till now</h2>
+            <h2>No Help till now</h2>
         {% endif %}
 
 

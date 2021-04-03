@@ -84,5 +84,26 @@ class Inventory:
         self.cursor.executemany(stmt,listOfTuples)
         self.mysql.connection.commit()
         if(self.debug):
-            print(f"Time taken to update Price {time.time() - tick}",file = sys.stderr)
+            print(f"Time taken to Add {time.time() - tick}",file = sys.stderr)
         return self.cursor.rowcount
+    def RemoveMultiple(self, freq:dict):
+        # need perfect key as itemname
+        tick = time.time()
+        listOfTuples = [(v,k) for k,v in freq.items()]
+        stmt = """update inventory SET frequency = frequency - %s where itemname = %s"""
+        self.cursor = self.mysql.connection.cursor()
+        self.cursor.executemany(stmt,listOfTuples)
+        self.mysql.connection.commit()
+        if(self.debug):
+            print(f"Time taken to Remove {time.time() - tick}",file = sys.stderr)
+        return self.cursor.rowcount
+
+    def getPriceDict(self):
+        self.cursor = self.mysql.connection.cursor()
+        self.cursor.execute(
+            "select itemname,price from inventory",
+            ()
+        )
+        priceList = self.cursor.fetchall()
+        priceDict = dict(priceList)
+        return priceDict

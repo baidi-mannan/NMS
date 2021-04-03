@@ -149,5 +149,5 @@ h1{
   margin-top: 5px;
   padding: 2px;
   justify-content: center;
-  align-items: inherit;
+  align-items: normal;
 }

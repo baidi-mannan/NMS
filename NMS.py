@@ -717,5 +717,105 @@ def managerupdatedonor():
         return request.form
     return render_template("manager/managerUpdateDonorProfile.html",inputs=inputs, user = None)
 
+
+@app.route("/manager-help-students", methods = ["POST","GET"])
+@manager_login_required
+def managerhelpstudents():
+    req = Requirement(mysql)
+    infoDict = req(forPrinting = False)
+
+    AvailFunds = ngobank.getFunds()
+    infoDict['AVA'] = AvailFunds
+    infoDict['userName'] = session['User']['userName']
+    # return str(infoDict)
+    if request.method == "POST":
+        if request.form['DONATION'] == "Sufficient":
+            donationid = Help(mysql).SufficientFulfil(infoDict)
+
+            # query = mysqlc.select(
+            #     [
+            #     """select 
+            #     id,
+            #     name,
+            #     rollnumber,
+            #     requirement_fees ,
+            #     requirement_book ,
+            #     requirement_bag ,
+            #     requirement_shoes ,
+            #     requirement_clothes
+            #     from studentlist
+            #      """,
+            #      ()
+            #      ]
+            # )
+            # headerName = ('ID', 'Name', 'Roll Number', 'Fees Donated', 'Book(s) Donated', 'Bag(s) Donated', 'Shoe(s) Donated', 'Dress(s) Donated')
+
+            # mysqlc.exeandcommit(
+            #     [
+            #         """update studentlist set 
+            #             requirement_fees = 0,
+            #             requirement_book = 0,
+            #             requirement_bag = 0,
+            #             requirement_shoes = 0,
+            #             requirement_clothes = 0
+            #             where id = 1;""",
+            #             ()
+            #     ]  
+            # )
+            return redirect(url_for('managershowhelp',donationid = donationid))
+    
+    if infoDict['REQ'] == 0:
+        return render_template("manager/managerHelpStudents.html",title = "All helps fulfilled", infoDict = infoDict)
+    if(infoDict['REQ']<= AvailFunds):
+        return render_template("manager/managerHelpStudents.html",title = "Sufficient Funds", infoDict = infoDict)
+    else:
+        return render_template("manager/managerHelpStudents.html",title = "Insufficient Funds", infoDict = infoDict)
+
+
+@app.route("/manager-show-help")
+@manager_login_required
+def managershowhelp():
+    
+    donationid = request.args.get('donationid')
+    
+    headerName = (
+        'Donation Id',
+        'Student Id',
+        'Name',
+        'Gender', 
+        'Family Income', 
+        'Last Marks',
+        'Fess Donated(Rs.)',
+        'Books Donated',
+        'Bags Donated',
+        'Shoes Donated',
+        'Dresses Donated',
+        'Date Of Donation'
+        )
+    global mysqlc
+    query = mysqlc.select(
+        [
+            """select 
+                donationId,
+                id,
+                name,
+                gender,
+                familyincome,
+                lastmarks,
+                requirement_fees, 
+                requirement_book, 
+                requirement_bag,
+                requirement_shoes,
+                requirement_clothes,
+                date(processedTimestamp)
+                from completedhelp order by donationid,id;""",
+            ()
+        ]
+        )
+    
+    return render_template("manager/managerShowHelps.html",query = query, headerName = headerName, donationid = donationid)
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)
