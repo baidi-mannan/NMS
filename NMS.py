@@ -274,8 +274,8 @@ def makePayment():
     if request.method == "POST":
         cur = mysql.connection.cursor()
         cur.execute(
-            """INSERT INTO funds (userName,userType,amount,status) VALUES (%s,%s, %s ,%s)""",
-            (session["User"]["userName"], session["User"]["type"], amount, 1),
+            """INSERT INTO funds (userName,userType,amount,status,tranmessage) VALUES (%s,%s, %s ,%s,%s)""",
+            (session["User"]["userName"], session["User"]["type"], amount, 1,f"{session['User']['userName']} donated Rs. {amount}"),
         )
         #cur.execute("commit")
         mysql.connection.commit()
@@ -439,11 +439,17 @@ def managershowstafflist():
 @app.route("/manager-show-donor-list")
 @manager_login_required
 def managershowdonorlist():
-    headerName = ('ID','Name','Email','Contact Number')
+    headerName = ('ID','Name','Email','Contact Number','Membership')
     global mysqlc
     query = mysqlc.select(
         [
-            "select id,name,email,contactnumber from donorList",
+            """select id,name,email,contactnumber,
+                case
+                    when membership = 1 then 'Semi-Anually'
+                    when membership = 0 then 'Anually'
+                    else 'N/A'
+                end as mtype
+             from donorList""",
             ()
         ]
         )
@@ -488,21 +494,37 @@ def managershowinventorylist():
     return render_template("manager/showInventory.html",headerName = headerName, query = query)
 
 
-@app.route("/manager-show-expenditures")
+@app.route("/manager-show-expenditures",methods=["GET","POST"])
 @manager_login_required
 def managershowexpenditures():
-    headerName = ('User Name','Amount (Rs.)','Remarks')
+    headerName = ('TransactionID','User Name','Amount (Rs.)','Remarks')
     global mysqlc
-    query = mysqlc.select(
+    title = "Expenditures"
+    if (request.method == "POST"):
+        if request.form['type'] == 'Expenditures':
+            query = mysqlc.select(
+            [
+                "select id,userName,amount,tranmessage from funds where status = 0 order by id",
+                ()
+            ]
+            )
+        else:
+            query = mysqlc.select(
+            [
+                "select id,userName,amount,tranmessage from funds where status = 1 order by id",
+                ()
+            ]
+            )
+            title = "Income"
+    else:
+        query = mysqlc.select(
         [
-            "select userName,amount,tranmessage from funds where status = 0 order by id",
+            "select id,userName,amount,tranmessage from funds where status = 0 order by id",
             ()
         ]
         )
     
-    print(query,file = sys.stderr)
-    
-    return render_template("manager/showExpenditures.html",headerName = headerName, query = query)
+    return render_template("manager/showExpenditures.html",headerName = headerName, query = query, title = title)
 
 @app.route("/manager-show-requirement")
 @manager_login_required
@@ -610,9 +632,10 @@ def updatemanagerprofile():
         if request.form['formName'] == "changePassword":
             manager = Manager(user['name'],user['userName'],Contact(user['email'],user['phone']),query[0][3],True)
             slqandval = manager.checkAndUpdatePasswordsqlandvalues(request.form['oldPassword'],request.form['newPassword'])
-            mysqlc.exeandcommit(slqandval)
-            print((request.form['newPassword'],slqandval),file =sys.stderr)
+            
             if(slqandval is not False):
+                mysqlc.exeandcommit(slqandval)
+                print((request.form['newPassword'],slqandval),file =sys.stderr)
                 return redirect(url_for('managerlogout'))
             else:
                 return "Wrong Password"
@@ -625,6 +648,74 @@ def updatemanagerprofile():
             return redirect(url_for('managerprofilepage'))
             
     return render_template("manager/updateManagerProfile.html",user=user)
+
+
+@app.route("/manager-update-donor",methods=["GET","POST"])
+@manager_login_required
+def managerupdatedonor():
+    global mysqlc
+    query = mysqlc.select(
+        [
+            "select userName from donorList",
+            ()
+        ]
+    )
+    inputs = [row[0]  for row in query]
+    
+    if request.method == "POST":
+        if request.form ['formName'] == "chooseDonor":
+            query = mysqlc.select(
+            [
+                "select name,email,contactnumber,userName,membership,password from donorList where username = %s",
+                (request.form['donorUserName'],)
+            ]
+            )
+
+            user = {
+                'name': query[0][0],
+                'email': query[0][1],
+                'phone':query [0][2],
+                'userName': query[0][3],
+                'membership':query[0][4],
+            }
+            return render_template("manager/managerUpdateDonorProfile.html",inputs=inputs, user = user)
+        if request.form['formName']  == "updateProfile":
+            userInfo = request.form
+            query = mysqlc.select(
+            [
+                "select name,email,contactnumber,userName,membership,password from donorList where username = %s",
+                (userInfo['userName'],)
+            ]
+            )
+            donor = Donor(userInfo['name'],userInfo['userName'],Contact(userInfo['email'],userInfo['phone']),query[0][5],int(userInfo['membership']))
+            mysqlc.exeandcommit(donor.updateInfosqlandvalues())
+
+            return "Profile Updated Successfully"
+        if request.form['formName'] == "changePassword":
+            userInfo = request.form
+            query = mysqlc.select(
+            [
+                "select name,email,contactnumber,userName,membership,password from donorList where username = %s",
+                (userInfo['userName'],)
+            ]
+            )
+            user = {
+                'name': query[0][0],
+                'email': query[0][1],
+                'phone':query [0][2],
+                'userName': query[0][3],
+                'membership':query[0][4],
+            }
+            donor = Donor(user['name'],user['userName'],Contact(user['email'],user['phone']),query[0][5],int(user['membership']))
+            # return str(query[0][5] == userInfo['oldPassword'])
+            stmt = donor.checkAndUpdatePasswordsqlandvalues(userInfo['oldPassword'],userInfo['newPassword'])
+            if stmt is not False:
+                mysqlc.exeandcommit(stmt)
+                return "Password chaned Successfully"
+            else:
+                return "wrong password"
+        return request.form
+    return render_template("manager/managerUpdateDonorProfile.html",inputs=inputs, user = None)
 
 if __name__ == "__main__":
     app.run(debug=True)

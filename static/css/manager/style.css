@@ -140,3 +140,14 @@ h1{
     height: 20px;
     width: 50%;
 }
+.form__chooseList
+{
+    display: flex;
+    
+  height: 5%;
+  flex-direction: row;
+  margin-top: 5px;
+  padding: 2px;
+  justify-content: center;
+  align-items: inherit;
+}
