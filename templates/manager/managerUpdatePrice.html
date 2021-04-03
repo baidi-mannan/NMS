@@ -15,7 +15,7 @@
     
     <div class="body">
         <h2> Update Price List</h2>
-<form method="post" action="">
+<form method="post" action=""  onsubmit="var myElement = document.getElementById('update__button');  myElement.disabled=true; myElement.innerText='Saving Price…';">
 
     
    
@@ -39,7 +39,7 @@
 
     
     
-     <button name="button" class= "form__button"type="submit" onClick="this.form.submit(); this.disabled=true; this.innerText='Saving…'; "value="save" > Save Changes</button>  
+     <button name="button" id = "update__button"class= "form__button"type="submit"value="save" > Save Changes</button>  
     
 </form>
     {% if saved %}

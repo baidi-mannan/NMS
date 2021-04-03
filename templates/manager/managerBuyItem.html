@@ -17,7 +17,7 @@
     
     <div class="body">
         <h2> Buy Items, Available Funds: &#8377;{{ funds }}</h2><br>
-<form method="post" action="" id="buyform">
+<form method="post" action="" onsubmit="var myElement = document.getElementById('buy__button');  myElement.disabled=true; myElement.innerText='Executing Order…';" id="buyform">
 
     
    
@@ -41,7 +41,7 @@
 
     
     
-     <button name="button" class= "form__button"type="submit" onClick="this.form.submit(); this.disabled=true; this.innerText='Executing Order…'; " value="buy" > Buy Now</button>  
+     <button name="button" id = "buy__button" class= "form__button"type="submit"  value="buy" > Buy Now</button>  
     
 </form>
     </div>
