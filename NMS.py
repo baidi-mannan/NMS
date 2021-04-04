@@ -968,8 +968,18 @@ def managershowhelp():
 def managermanagestaff():
     global mysqlc
     if request.method == "POST":
-        if request.form.get('formName') == None :
+        if request.form.get('formName') == None and request.form.get('pageOption') != "Remove Staff":
             return render_template ('manager/managerManageStaff.html',user = None,status = 1,option = request.form)
+        if request.form.get('formName') == None and request.form.get('pageOption') == "Remove Staff":
+            query = mysqlc.select([
+                "select userName from stafflist where role = 'staff';",
+                ()
+            ])
+            if(len(query)==0):
+                return "No staff(s) in NGO"
+            staffuserNameList = [row[0] for row in query]
+            return render_template ('manager/managerManageStaff.html',user = staffuserNameList,status = 1,option= request.form)
+            
         if request.form.get('formName') == "Register Staff" :
             sinfo = request.form
             query = mysqlc.select(
@@ -997,7 +1007,18 @@ def managermanagestaff():
                 s.getsqlandvalues()
             )
             return "Successful Staff registration"
-
+        if request.form.get('formName') == 'Remove Staff':
+            query = mysqlc.select([
+                "select userName from stafflist where userName = %s;",
+                (request.form.get('staffUserName'),)
+            ])
+            if(len(query)==0):
+                return "Staff Already Removed from NGO"
+            mysqlc.exeandcommit([
+                "DELETE FROM stafflist WHERE userName = %s",
+                (request.form.get('staffUserName'),)
+            ])
+            return f"{request.form.get('staffUserName')} Removed from NGO!"
     return render_template ('manager/managerManageStaff.html',user = None,status = None)
 
 
