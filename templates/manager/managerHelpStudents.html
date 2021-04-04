@@ -33,13 +33,22 @@
             </h5>
         {% endif %}
         {% if title =='Insufficient Funds' %}
+        <br>
+        <h4>Choose Priority</h4>
+        <br>
         <form class = "form__chooseList"name = "chooseForm" method="POST" action="" onsubmit="var myElement = document.getElementById('chooseFormButton'); myElement.innerText = 'Choosing ...'">
-            <select name="type">
-                    <option value="Expenditures"selected>Expenditures</option>
-                    <option value="Income">Income</option>
+            <select name="Priority">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="FamilyIncome">FamilyIncome</option>
+                    <option value="StudentPerformance"selected>StudentPerformance</option>
             </select>
+            <input type="hidden" name="DONATION" value="Insufficient"/>
             <button name = formName id = 'chooseFormButton' type="submit" value="chooseForm">Choose</button>
         </form>
+        <br>
+        <h4>available fund Rs.{{infoDict['AVA']}}</h4>
+        
         {% endif %}
 
         
