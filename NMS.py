@@ -963,6 +963,43 @@ def managershowhelp():
         donationid=donationid,
     )
 
+@app.route("/manager-manage-staff",methods = ["GET","POST"])
+@manager_login_required
+def managermanagestaff():
+    global mysqlc
+    if request.method == "POST":
+        if request.form.get('formName') == None :
+            return render_template ('manager/managerManageStaff.html',user = None,status = 1,option = request.form)
+        if request.form.get('formName') == "Register Staff" :
+            sinfo = request.form
+            query = mysqlc.select(
+                [
+                    """select 
+                    COALESCE(sum(userName=%s),0), COALESCE(sum(email = %s),0) ,COALESCE(sum(contactnumber = %s),0)
+                    from stafflist 
+                    where userName = %s or email = %s or contactnumber = %s;
+                    """,
+                    (sinfo['userName'],sinfo['email'],sinfo['phone'],sinfo['userName'],sinfo['email'],sinfo['phone'],)
+                ]
+            )
+            if query[0][0] + query[0][1] + query[0][2]>0 :
+                errorMessage = ""
+                if(query[0][0]):
+                    errorMessage = errorMessage + "userName Already taken,"
+                if(query[0][1]):
+                    errorMessage = errorMessage + "email Already present in database,"
+                if(query[0][2]):
+                    errorMessage = errorMessage + "Phone number present in database,"
+                errorMessage = errorMessage + " Please give new details"
+                return errorMessage
+            s = Staff(sinfo['name'], sinfo['userName'], Contact(sinfo['email'], sinfo['phone']), sinfo['password_1'])
+            mysqlc.exeandcommit(
+                s.getsqlandvalues()
+            )
+            return "Successful Staff registration"
+
+    return render_template ('manager/managerManageStaff.html',user = None,status = None)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

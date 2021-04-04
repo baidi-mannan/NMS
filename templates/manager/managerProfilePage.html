@@ -7,17 +7,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Raleway&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/manager/managerProfilePage.css') }}">
-    <title>Donor Profile</title>
+    <title>Manager Profile</title>
 </head>
 <body>
     
     <div class="body">
         
-        <div >
-        <h1>Welcome Back,Manager {{Userdetails["name"]}}</h1>
-        </div>
-        <br>
+        
         <div class="con">
+            <h2>Welcome Back, <br> Manager {{Userdetails["name"]}}</h2>
             <h3>Please choose among the following options</h3>
             <div class="donate">
                 <button onClick="document.location ='donate-money'">DONOTE MONEY</button>
@@ -34,6 +32,11 @@
             <div class="donate">
 
                 <button onClick="document.location ='manager-update-donor'">Update Donors Profile</button>
+                <button type="button"onClick="document.location = 'manager-help-students'">Help Students</button>
+                <button type="button"onClick="document.location = 'manager-show-help'">See Help</button>
+            </div>
+            <div class="donate">
+                <button onClick="document.location ='manager-manage-staff'">Manage Staff</button>
                 <button type="button"onClick="document.location = 'manager-help-students'">Help Students</button>
                 <button type="button"onClick="document.location = 'manager-show-help'">See Help</button>
             </div>

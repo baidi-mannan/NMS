@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Pangolin&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/manager/managerupdatestaff.css') }}">
+    <title>Manage Staff</title>
+</head>
+<body>
+    <button class = "button__homepage"onClick="document.location ='managerprofilepage'">Profile Page</button>
+    <form class = "form__chooseDonor"name = "SelectOption" method="POST" action="" onsubmit="var myElement = document.getElementById('chooseDonorButton'); myElement.innerText = 'Choosing ...'">
+        <select name="pageOption">
+            <option value="Add Staff" selected>Add Staff</option>
+            <option value="Remove Staff">Remove Staff</option>
+            <!-- <option value="Update Staff">Update Staff</option> -->
+        </select>
+        <button name = 'pageOptionButton' id = 'pageOptionButton' type="submit" value="choosePageOption">Choose</button>
+    </form>
+    {% if status != None %}
+        {% if option['pageOption'] == 'Add Staff' %}
+        <div class="form__staff">     
+            <form name="profileForm" method="post" action="" onsubmit="var myElement = document.getElementById('infosubmit'); myElement.disabled=true; myElement.innerText='Saving…'; ">
+
+                <h3> Register Staff</h3>
+            
+                <div>
+                    <label for="name">Name:</label><br>
+                    <input type="text" id="name" name="name" placeholder="Enter Name" required>
+                </div>
+                <div>
+                    <label for="userName">User Name:</label><br>
+                    <input type="text"id="userName" name="userName" placeholder="Enter User Name" required>
+                </div>
+                <div>
+                    <label for="email">Email Id:</label><br>
+                    <input type="email"id = "email"name ="email" placeholder="Enter Email" required >
+                </div>
+                <div>
+                    <label for="phone">Phone No:</label><br>
+                    <input type="text" pattern= "[6-9]{1}[0-9]{9}"id = "phone"name ="phone" placeholder="Enter Valid Phone" oninvalid="setCustomValidity('Please enter a 10 digit number,starting with 6,7,8,9 ')"
+                    onchange="try{setCustomValidity('')}catch(e){alert(e)}" required >
+                </div>
+                <div>
+                    <label for="password_1">Password:</label><br>
+                    <input type="password" id = "password_1"name ="password_1" placeholder="Enter Password" required >
+                </div>
+                <div>
+                    <label for="password_2">Confirm Password</label><br>
+                    <input type="password" id = "password_2"name ="password_2" placeholder="Renter Password" required >
+                </div>
+                <input type="hidden" name = "formName" value="Register Staff"/>
+                <button name="button" id="infosubmit" type="submit" value="save"> Save Changes</button>
+                
+            </form>
+        </div>
+        {% endif %}
+        {% if option['pageOption'] == 'Remove Staff' %}
+            hey wanna remove me ▌£å←x☺☻♥
+        {% endif %}
+    {% endif %}
+    
+    
+    
+    
+    
+  
+
+  <script>
+    var password = document.getElementById("password_1"), confirm_password = document.getElementById("password_2");
+    // var phone = document.getElementById("phone");
+    function validatePassword(){
+    if(password.value != confirm_password.value) {
+        confirm_password.setCustomValidity("Passwords Don't Match");
+    } else {
+        confirm_password.setCustomValidity('');
+    }
+    }
+    password.onchange = validatePassword;
+    confirm_password.onkeyup = validatePassword;
+    </script>
+</body>
+</html>
