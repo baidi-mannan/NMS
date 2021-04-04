@@ -4,7 +4,8 @@ from SupportModules import *
 from functools import wraps
 import json
 import sys
-import time 
+import time
+
 app = Flask(__name__)
 # app.config["MYSQL_USER"] = "sql6401232"
 # app.config["MYSQL_PASSWORD"] = "un2P67tMei"
@@ -142,50 +143,111 @@ def managerLogin():
     return render_template("manager/managerLogin.html", userType="manager")
 
 
-@app.route("/staff-login")
+@app.route("/staff-login", methods=["GET", "POST"])
 def staffLogin():
-    return render_template("staff/staffLogin.html", userType="staff")
-
-
-@app.route("/staffcheckpassword", methods=["POST"])
-def staffcheckpassword():
     staffDetails = request.form
-    userName = staffDetails["userName"]
-    password = staffDetails["password"]
-    session.pop("User", None)
-    global mysqlc
-    query = mysqlc.select(
-        [
-            "select id,username,name,password from stafflist where username = %s and role = %s",
-            (
-                userName,
-                "staff",
-            ),
-        ]
-    )
-    if len(query) == 0:
-        return json.dumps({"statusCode": -1, "message": "User doesn't exist"})
-    else:
-        if query[0][3] == Password(password).getEncryptedPassword():
-            session["User"] = {
-                "name": query[0][2],
-                "userName": userName,
-                "id": query[0][0],
-                "type": "staff",
-            }
+    if request.method == "POST":
+        userName = staffDetails["userName"]
+        password = staffDetails["password"]
+        session.pop("User", None)
 
-            return json.dumps(
-                {"statusCode": 1, "message": f"Successful Login {query[0][2]}"}
-            )
+        query = mysqlc.select(
+            [
+                "select id,username,name,password,email,contactnumber from stafflist where username = %s",
+                (userName,),
+            ]
+        )
+        print(query)
+        if len(query) == 0:
+            return "<h5> NO SUCH USERNAME EXISTS<br> PLEASE TRY AGAIN</h5>"
         else:
-            return json.dumps({"statusCode": -2, "message": f"Wrong password"})
-    return json.dumps({"statusCode": 1, "message": "Success"})
+            # if(query[0][3] == Password(password).getEncryptedPassword()):
+            if query[0][3] == password:
+
+                session["User"] = {
+                    "name": query[0][2],
+                    "userName": userName,
+                    "id": query[0][0],
+                    "type": "staff",
+                    "email": query[0][4],
+                    "contactNumber": query[0][5],
+                    "pw": query[0][3],
+                }
+                return redirect(url_for("staffprofilepage"))
+
+            else:
+                return "<h5> INCORRECT PASSWORD<br> PLEASE TRY AGAIN</h5>"
+
+    return render_template("staff/staffLogin.html", userType="staff")
 
 
 @app.route("/staffprofilepage")
 @staff_login_required
 def staffprofilepage():
-    return f"Hello {session['User']['name']}"
+    return render_template("staff/staffProfilePage.html", userDetails=session["User"])
+
+
+@app.route("/update-staff-profile", methods=["GET", "POST"])
+def updateStaffProfile():
+    global mysql
+    cur = mysql.connection.cursor()
+
+    if request.method == "POST":
+
+        userID = session["User"]["id"]
+        if request.form["button"] == "save":
+            staffDetails = request.form
+
+            cur.execute(
+                """UPDATE stafflist SET name=%s,email=%s,contactnumber=%s WHERE id=%s""",
+                (
+                    staffDetails["name"],
+                    staffDetails["email"],
+                    staffDetails["contactNumber"],
+                    userID,
+                ),
+            )
+
+            mysql.connection.commit()
+            session["User"]["name"] = staffDetails["name"]
+            session["User"]["email"] = staffDetails["email"]
+            session["User"]["contactNumber"] = staffDetails["contactNumber"]
+
+            session.modified = True
+            return "<h5> USER DEATILS CHANGED</h5>"
+        if request.form["button"] == "changePassword":
+            inputs = request.form
+            if session["User"]["pw"] == inputs["oldPassword"]:
+                output = checkPassword(inputs)
+                if output["isValid"]:
+                    cur.execute(
+                        """UPDATE stafflist SET password=%s WHERE id=%s""",
+                        (
+                            inputs["newPassword"],
+                            userID,
+                        ),
+                    )
+                    print(inputs["newPassword"])
+                    mysql.connection.commit()
+                    session.pop("User", None)
+                    return redirect(url_for("staffLogin"))
+
+                else:
+                    return output["message"]
+            else:
+                return "<h5>YOU HAVE ENTERED WRONG PASSWORD<br>PLEASE TRY AGAIN</h5>"
+
+    return render_template("staff/updateStaffProfile.html", user=session["User"])
+
+
+@app.route("/register-student", methods=["GET", "POST"])
+def registerStudent():
+    global mysqlc
+    if request.method == "POST":
+        mysqlc.registerStudent(request.form)
+
+        return "STUDENT REGISTERED"
+    return render_template("staff/registerStudent.html", user=session["User"])
 
 
 @app.route("/stafflogout")
@@ -201,7 +263,7 @@ def managercheckpassword():
     userName = managerDetails["userName"]
     password = managerDetails["password"]
     session.pop("User", None)
-    global mysqlc 
+    global mysqlc
     query = mysqlc.select(
         [
             "select id,username,name,password from stafflist where username = %s and role = %s",
@@ -215,6 +277,7 @@ def managercheckpassword():
         return json.dumps({"statusCode": -1, "message": "User doesn't exist"})
     else:
         if query[0][3] == Password(password).getEncryptedPassword():
+
             session["User"] = {
                 "name": query[0][2],
                 "userName": userName,
@@ -231,7 +294,9 @@ def managercheckpassword():
 @app.route("/managerprofilepage")
 @manager_login_required
 def managerprofilepage():
-    return render_template("manager/managerProfilePage.html",Userdetails=session["User"])
+    return render_template(
+        "manager/managerProfilePage.html", Userdetails=session["User"]
+    )
 
 
 @app.route("/manager-logout")
@@ -289,31 +354,30 @@ def donateItem():
     if request.method == "POST":
         global inventory
         donation = request.form
-        print(donation,file=sys.stderr)
+        print(donation, file=sys.stderr)
         donated = False
-        donationfreq = int(donation['book'])
-        if(donationfreq>0):
+        donationfreq = int(donation["book"])
+        if donationfreq > 0:
             donated = True
-            inventory.addItem(Item(ItemType['BOOK']),donationfreq)
-        donationfreq = int(donation['bag'])
-        if(donationfreq>0):
+            inventory.addItem(Item(ItemType["BOOK"]), donationfreq)
+        donationfreq = int(donation["bag"])
+        if donationfreq > 0:
             donated = True
-            inventory.addItem(Item(ItemType['BAG']),donationfreq)
-        donationfreq = int(donation['shoes'])
-        if(donationfreq>0):
+            inventory.addItem(Item(ItemType["BAG"]), donationfreq)
+        donationfreq = int(donation["shoes"])
+        if donationfreq > 0:
             donated = True
-            inventory.addItem(Item(ItemType['SHOES']),donationfreq)
-        donationfreq = int(donation['clothes'])
-        if(donationfreq>0):
+            inventory.addItem(Item(ItemType["SHOES"]), donationfreq)
+        donationfreq = int(donation["clothes"])
+        if donationfreq > 0:
             donated = True
-            inventory.addItem(Item(ItemType['CLOTHES']),donationfreq)
-        if(donated):
+            inventory.addItem(Item(ItemType["CLOTHES"]), donationfreq)
+        if donated:
             return "<h5>Thank you your donation</h5>"
         else:
             return "<h5>No items donated! Please try again.</h5>"
     if request.method == "GET":
         return render_template("donor/donateItem.html")
-
 
 
 @app.route("/update-donor-profile", methods=["GET", "POST"])
@@ -373,7 +437,7 @@ def updateDonorProfile():
 
     if request.method == "GET":
         # tick=time.time()
-        # global mysqlc 
+        # global mysqlc
         # # mysqlc = mysqlcon(mydbDetails)
         # query = mysqlc.select(
         #         [
@@ -388,69 +452,70 @@ def updateDonorProfile():
         # user['email']=query[0][5]
         # user['contactNumber']=query[0][6]
         # user["membership"]=query[0][4]
-        return render_template("donor/updateDonorProfile.html", user=session['User'])
-    
+        return render_template("donor/updateDonorProfile.html", user=session["User"])
+
+
 # managers code starts here
 @app.route("/manager-show-student-list")
 @manager_login_required
 def managershowstudentlist():
-    headerName = ('Name','Class','Roll Number','Last Marks','Family Income','Contact Number','Help Required(Rs.)')
-    global mysqlc
-    priceList = mysqlc.select(
-        [
-            "select itemname,price from inventory",
-            ()
-        ]
+    headerName = (
+        "Name",
+        "Class",
+        "Roll Number",
+        "Last Marks",
+        "Family Income",
+        "Contact Number",
+        "Help Required(Rs.)",
     )
-    
+    global mysqlc
+    priceList = mysqlc.select(["select itemname,price from inventory", ()])
+
     priceDict = dict(priceList)
-    print(priceDict,file = sys.stderr)
+    print(priceDict, file=sys.stderr)
     query = mysqlc.select(
         [
             "select Name,Class,rollnumber,lastmarks,familyincome,contactnumber,(requirement_fees+%s*requirement_book + %s*requirement_bag + %s*requirement_shoes + %s*requirement_clothes)  from studentlist order by class",
-            (priceDict['BOOK'],priceDict['BAG'],priceDict['SHOES'] , priceDict['CLOTHES'],)
+            (
+                priceDict["BOOK"],
+                priceDict["BAG"],
+                priceDict["SHOES"],
+                priceDict["CLOTHES"],
+            ),
         ]
-        )
-    
-    
-    print(query,file = sys.stderr)
-    
-    return render_template("manager/showStudent.html",headerName = headerName, query = query)
+    )
+
+    print(query, file=sys.stderr)
+
+    return render_template(
+        "manager/showStudent.html", headerName=headerName, query=query
+    )
+
 
 @app.route("/manager-show-staff-list")
 @manager_login_required
 def managershowstafflist():
-    headerName = ('ID','Name','Email','Contact Number')
+    headerName = ("ID", "Name", "Email", "Contact Number")
     global mysqlc
     query = mysqlc.select(
-        [
-            "select id,name,email,contactnumber from stafflist where role = 'staff'",
-            ()
-        ]
-        )
-    
-    print(query,file = sys.stderr)
-    
-    return render_template("manager/showStaff.html",headerName = headerName, query = query)
+        ["select id,name,email,contactnumber from stafflist where role = 'staff'", ()]
+    )
+
+    print(query, file=sys.stderr)
+
+    return render_template("manager/showStaff.html", headerName=headerName, query=query)
 
 
 @app.route("/manager-show-donor-list")
 @manager_login_required
 def managershowdonorlist():
-    headerName = ('ID','Name','Email','Contact Number')
+    headerName = ("ID", "Name", "Email", "Contact Number")
     global mysqlc
-    query = mysqlc.select(
-        [
-            "select id,name,email,contactnumber from donorList",
-            ()
-        ]
-        )
-    
-    print(query,file = sys.stderr)
-    
-    return render_template("manager/showStaff.html",headerName = headerName, query = query)
+    query = mysqlc.select(["select id,name,email,contactnumber from donorList", ()])
 
+    print(query, file=sys.stderr)
 
+    return render_template("manager/showStaff.html", headerName=headerName, query=query)
 
 
 @app.route("/manager-show-funds")
@@ -460,48 +525,45 @@ def managershowfunds():
     query = mysqlc.select(
         [
             "SELECT sum(IF(`status`=1, `amount`, 0))-sum(IF(`status`=0, `amount`, 0)) AS    `Balance` FROM   funds",
-            ()
+            (),
         ]
-        )
-    
-    print(query,file = sys.stderr)
-    
-    return render_template("manager/showFunds.html",BalanceFund = query[0][0])
+    )
+
+    print(query, file=sys.stderr)
+
+    return render_template("manager/showFunds.html", BalanceFund=query[0][0])
 
 
 @app.route("/manager-show-inventory-list")
 @manager_login_required
 def managershowinventorylist():
-    headerName = ('Item Name','Available Units','Unit Price')
+    headerName = ("Item Name", "Available Units", "Unit Price")
     global mysqlc
     query = mysqlc.select(
-        [
-            "select itemname,frequency,price from inventory order by itemid",
-            ()
-        ]
-        )
-    
-    print(query,file = sys.stderr)
-    
-    return render_template("manager/showInventory.html",headerName = headerName, query = query)
+        ["select itemname,frequency,price from inventory order by itemid", ()]
+    )
+
+    print(query, file=sys.stderr)
+
+    return render_template(
+        "manager/showInventory.html", headerName=headerName, query=query
+    )
 
 
 @app.route("/manager-show-expenditures")
 @manager_login_required
 def managershowexpenditures():
-    headerName = ('User Name','Amount (Rs.)')
+    headerName = ("User Name", "Amount (Rs.)")
     global mysqlc
     query = mysqlc.select(
-        [
-            "select userName,amount from funds where status = 0 order by id",
-            ()
-        ]
-        )
-    
-    print(query,file = sys.stderr)
-    
-    return render_template("manager/showExpenditures.html",headerName = headerName, query = query)
+        ["select userName,amount from funds where status = 0 order by id", ()]
+    )
 
+    print(query, file=sys.stderr)
+
+    return render_template(
+        "manager/showExpenditures.html", headerName=headerName, query=query
+    )
 
 
 @app.route("/manager-check-records")

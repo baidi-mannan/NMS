@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/staff/registerStudent.css') }}">
+    <title>Register Student</title>
+</head>
+
+<body>
+    <div class="body">
+
+
+        <form method="post" action="">
+            <div>
+                <h1> Enter Students Details</h1>
+            </div>
+            <div class="subform">
+                <h3>Personal Details</h3>
+                <div>Name:<br>
+                    <input type="text" name="name" required>
+                </div>
+                <div>Email ID:<br>
+                    <input type="text" name="email">
+                </div>
+                <div>Contact Number:<br>
+                    <input type="text" name="contactNumber" required>
+                </div>
+                <div>Gender:<br>
+                    <select name="gender">    
+                
+               
+                    <option value="male" selected>MALE</option>
+                    <option value="female" >FEMALE</option>              
+                
+            </select>
+                </div>
+                <div>Family Income:<br>
+                    <input type="number" name="familyIncome" required>
+                </div>
+            </div>
+
+            <!-- ------------------------------------------------------------------- -->
+            <div class="subform">
+                <h3>Academic Details</h3>
+                <div>Class:<br>
+                    <input type="number" name="class" required>
+                </div>
+                <div>Roll Number:<br>
+                    <input type="number" name="rollNumber" required>
+                </div>
+                <div>Last year Marks:<br>
+                    <input type="number" max="100" step="0.1" name="lastMarks" required>
+                </div>
+            </div>
+            <!-- ------------------------- -->
+            <div class="subform">
+
+
+                <h3> Requirements:</h3>
+
+                <div class="require">
+                    <div>
+                        Fees:<br> <input type="number" name="fees" value="700">
+                    </div>
+                    <div>
+                        Books:<br><input type="number" name="books" value="5">
+                    </div>
+                    <div>
+                        Bags:<br> <input type="number" name="bags" value="2">
+                    </div>
+                    <div>
+                        Shoes:<br> <input type="number" name="shoes" value="2">
+                    </div>
+                    <div>
+                        Clothes: <br><input type="number" name="clothes" value="2">
+                    </div>
+
+                </div>
+            </div>
+            <button name="button" type="submit">Enter Details</button>
+
+        </form>
+
+
+    </div>
+
+
+
+
+</body>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Pangolin&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/staff/updateStaffProfile.css') }}">
+    <title>UPDATE PROFILE</title>
+</head>
+<body>
+    <div class="body">
+  <div class="forms">
+      <div class="form1">     
+ <form method="post" action="">
+
+    <h3> Update your Details</h3>
+   
+    <div>Name:<br>
+    <input type="text" name="name" value="{{user['name']}}">
+    </div>
+    <div>Username:<br>
+    <input type="text" name="userName" class="permanent" value="{{user['userName']}}" disabled>
+    </div>
+    <div>Email ID:<br>
+    <input type="text" name ="email" value="{{user['email']}}" >
+    </div>
+    <div>Contact Number:<br>
+    <input type="text" name ="contactNumber" value="{{user['contactNumber']}}">
+    </div>
+   
+
+
+     <button name="button" type="submit" value="save"> Save Changes</button>  
+    
+</form>
+</div>
+<div class="form2">
+<form method="post" action="">
+    <h3> Change Password</h3>
+    <div>Old Password:<br>
+    <input type="password" name="oldPassword" placeholder="Your old password...">
+    </div>
+    <div>New Password:<br>
+    <input type="password" name="newPassword" placeholder="Your new password...">
+    </div>
+    <div>Re-enter New Password:<br>
+    <input type="password" name="reNewPassword" placeholder="Renter new password...">
+    </div>
+    <button name ="button" type="submit" value="changePassword">CHANGE PASSWORD</button>
+
+</form>
+</div>
+    </div>
+<div class ="options"> 
+   
+    <button name ="button" type="button"onClick="document.location = 'update-donor-profile'">Discard Changes</button>
+</div>
+
+  </div>
+</body>
+</html>
