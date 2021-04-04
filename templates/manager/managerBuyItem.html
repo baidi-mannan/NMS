@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/manager/style.css') }}">
+
+    <title>Buy Items</title>
+</head>
+<body>
+    
+    <button class = "button__homepage"onClick="document.location ='managerprofilepage'">Profile Page</button>   
+    
+    <div class="body">
+        <h2> Buy Items, Available Funds: &#8377;{{ funds }}</h2><br>
+<form method="post" action="" onsubmit="var myElement = document.getElementById('buy__button');  myElement.disabled=true; myElement.innerText='Executing Order…';" id="buyform">
+
+    
+   
+    <div class= "form__div">
+        <label for="BOOK">Book Price &#8377;{{ priceDict['BOOK'] }}/unit :</label><br>
+    <input class="form__input"type="number" id= "BOOK" name="BOOK" value="0" min =0>
+    </div>
+    <div class= "form__div">
+        <label for="BAG">Bag Price:&#8377;{{ priceDict['BAG'] }}/unit :</label><br>
+    <input class="form__input" type="number" id = "BAG" name="BAG" value="0" min =0>
+    </div>
+    <div class= "form__div">
+        <label for="SHOES">Shoes Price:&#8377;{{ priceDict['SHOES'] }}/unit :</label><br>
+    <input class="form__input" type="number" id = "SHOES" name ="SHOES" value="0" min =0>
+    </div>
+    <div class= "form__div">
+    <label for="CLOTHES">Clothes Price:&#8377;{{ priceDict['CLOTHES'] }}/unit :</label><br>
+    <input class="form__input" type="number" id = "CLOTHES"name ="CLOTHES" value="0" min =0>
+    </div>
+   
+
+    
+    
+     <button name="button" id = "buy__button" class= "form__button"type="submit"  value="buy" > Buy Now</button>  
+    
+</form>
+    </div>
+    
+
+    
+</body>
+</html>

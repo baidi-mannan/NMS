@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/manager/style.css') }}">
+    <title>{{ title }} List</title>
+</head>
+<body>
+    <button class = "button__homepage"onClick="document.location ='managerprofilepage'">Profile Page</button> 
+    <br>
+    
+    
+
+    <div class="body">
+        
+        <div >
+        <h1>{{ title }}</h1>
+        </div>
+
+        {% if title =='Sufficient Funds' %}
+            <h5> 
+                Funds required {{infoDict['REQ']}}
+                <br>
+                available fund {{infoDict['AVA']}}
+                <form action="" method="POST" onsubmit="var myElement = document.getElementById('button__pay__sufficient'); myElement.disabled = true; myElement.innerText = 'Paying...'">
+                    <input type="hidden" name="DONATION" value="Sufficient"/>
+                    <button id="button__pay__sufficient">Pay {{infoDict['REQ']}}</button>
+                </form>
+            </h5>
+        {% endif %}
+        {% if title =='Insufficient Funds' %}
+        <form class = "form__chooseList"name = "chooseForm" method="POST" action="" onsubmit="var myElement = document.getElementById('chooseFormButton'); myElement.innerText = 'Choosing ...'">
+            <select name="type">
+                    <option value="Expenditures"selected>Expenditures</option>
+                    <option value="Income">Income</option>
+            </select>
+            <button name = formName id = 'chooseFormButton' type="submit" value="chooseForm">Choose</button>
+        </form>
+        {% endif %}
+
+        
+        
+
+
+    </div>
+
+    
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/manager/style.css') }}">
+
+    <title>Result</title>
+</head>
+<body>
+    
+    <button class = "button__homepage"onClick="document.location ='managerprofilepage'">Profile Page</button>   
+    
+    <div class="body">
+        <h2> Available Funds: &#8377;{{ funds }}</h2><br>
+    {% if status == '1' %}
+        <br>
+        <h2> Bought successfully, Bill Amount=&#8377;{{ bamount }}</h2>
+        <br>
+    {% else %}
+        {% if status == '-1' %}
+        <br>
+        <h2>Insufficient Funds, Bill Amount=&#8377;{{ bamount }}</h2>
+        <br>
+        {% endif %}
+        {% if status == '-2' %}
+        <br>
+        <h2>No items Bought! Bill Amount=&#8377;{{ bamount }}</h2>
+        <br>
+        {% endif %}
+    {% endif %}
+    <button class = "form__button"onClick="document.location ='manager-buy-item'">Return to Buy Page</button>  
+    </div>
+    
+
+    
+</body>
+</html>
