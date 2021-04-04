@@ -1021,6 +1021,15 @@ def managermanagestaff():
             return f"{request.form.get('staffUserName')} Removed from NGO!"
     return render_template ('manager/managerManageStaff.html',user = None,status = None)
 
+@app.route("/manager-register-student", methods=["GET", "POST"])
+@manager_login_required
+def managerregisterStudent():
+    global mysqlc
+    if request.method == "POST":
+        mysqlc.registerStudent(request.form)
+
+        return "STUDENT REGISTERED"
+    return render_template("staff/registerStudent.html", user=session["User"])
 
 if __name__ == "__main__":
     app.run(debug=True)

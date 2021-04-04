@@ -10,7 +10,7 @@
     <title>Manager Profile</title>
 </head>
 <body>
-    <button type="button"onClick="document.location = 'manager-manual'">USER MANUAL</button>
+    
     <div class="body">
         
         
@@ -18,9 +18,9 @@
             <h2>Welcome Back, <br> Manager {{Userdetails["name"]}}</h2>
             <h3>Please choose among the following options</h3>
             <div class="donate">
-                
-                
-                
+                <button onClick="document.location ='manager-register-student'">Register Students</button>
+                <button type="button"onClick="document.location ='manager-check-records'">Check Records</button>
+                <button type="button"onClick="document.location = 'donate-item'">DONOTE ITEM</button>
             </div>
             
             <div class="donate">
@@ -42,7 +42,7 @@
             </div>
             <div class="donate">
                 <button onClick="document.location ='update-manager-profile'">UPDATE PROFILE</button>
-                <button type="button"onClick="document.location ='manager-check-records'">Check Records</button>
+                <button type="button"onClick="document.location = 'manager-manual'">USER MANUAL</button>
                 <button type="button"onClick="document.location = 'manager-logout'">LOG OUT</button>
             </div>
         </div>
