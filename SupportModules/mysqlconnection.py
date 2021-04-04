@@ -1,6 +1,7 @@
 import mysql.connector
 import sys
 import time
+
 # import numpy as np
 
 
@@ -12,32 +13,32 @@ class mysqlcon:
             user=dblogin["user"],
             password=dblogin["password"],
             database=dblogin["database"],
-            autocommit=True
+            autocommit=True,
         )
         self.cursor = self.db.cursor()
         self.debug = True
 
     # def __del__(self):
     #     self.db.close()
-    
+
     def validate(self):
         tick = time.time()
-        if(self.db.is_connected()):
-            if(self.debug):
-                print(f"Validation check took{time.time() - tick}",file = sys.stderr)
+        if self.db.is_connected():
+            if self.debug:
+                print(f"Validation check took{time.time() - tick}", file=sys.stderr)
             return 1
         else:
             self.db.close()
             self.db = mysql.connector.connect(
-            host=self.dblogin["host"],
-            user=self.dblogin["user"],
-            password=self.dblogin["password"],
-            database=self.dblogin["database"],
+                host=self.dblogin["host"],
+                user=self.dblogin["user"],
+                password=self.dblogin["password"],
+                database=self.dblogin["database"],
             )
             self.cursor = self.db.cursor()
-            if(self.debug):
-                print(f"Reconnection  took{time.time() - tick}",file = sys.stderr)
-            
+            if self.debug:
+                print(f"Reconnection  took{time.time() - tick}", file=sys.stderr)
+
             return 0
 
     def select(self, sqlandval: list):
@@ -62,3 +63,26 @@ class mysqlcon:
             strArr.append(arr[i][0])
 
         return strArr
+
+    def registerStudent(self, details):
+        print(details)
+        self.cursor.execute(
+            """INSERT INTO studentlist(name,class,requirement_fees,requirement_book,requirement_bag,requirement_shoes,requirement_clothes,email,rollnumber,contactnumber,lastmarks,gender,familyincome) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+            (
+                details["name"],
+                details["class"],
+                details["fees"],
+                details["books"],
+                details["bags"],
+                details["shoes"],
+                details["clothes"],
+                details["email"],
+                details["rollNumber"],
+                details["contactNumber"],
+                details["lastMarks"],
+                details["gender"],
+                details["familyIncome"],
+            ),
+        )
+
+        self.db.commit()
