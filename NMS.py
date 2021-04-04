@@ -723,7 +723,6 @@ def managerupdatedonor():
 def managerhelpstudents():
     req = Requirement(mysql)
     infoDict = req(forPrinting = False)
-
     AvailFunds = ngobank.getFunds()
     infoDict['AVA'] = AvailFunds
     infoDict['userName'] = session['User']['userName']
@@ -763,7 +762,9 @@ def managerhelpstudents():
             #     ]  
             # )
             return redirect(url_for('managershowhelp',donationid = donationid))
-    
+        if request.form.get('DONATION') == 'Insufficient':
+            donationid = Help(mysql).InSufficientFulfil(infoDict,request.form['Priority'])
+            return redirect(url_for('managershowhelp',donationid = donationid))
     if infoDict['REQ'] == 0:
         return render_template("manager/managerHelpStudents.html",title = "All helps fulfilled", infoDict = infoDict)
     if(infoDict['REQ']<= AvailFunds):
@@ -808,7 +809,8 @@ def managershowhelp():
                 requirement_shoes,
                 requirement_clothes,
                 date(processedTimestamp)
-                from completedhelp order by donationid,id;""",
+                from completedhelp order by donationid desc,id
+                ;""",
             ()
         ]
         )
