@@ -18,3 +18,14 @@ class Manager:
         else:
             value = (self.name,self.contact.emailid,self.username, self.encryptedpassword,self.contact.phone,'manager')
         return [sql,value]
+    def updateInfosqlandvalues(self):
+        sql = "update stafflist SET name=%s,email=%s,contactnumber=%s where username = %s"
+        value = (self.name,self.contact.emailid, self.contact.phone,self.username)
+        return [sql,value]
+    def checkAndUpdatePasswordsqlandvalues(self,oldpw,newpw):
+        if Password(oldpw).getEncryptedPassword() == self.encryptedpassword:
+            sql = "update stafflist SET password=%s where username = %s"
+            value = ( Password(newpw).getEncryptedPassword(),self.username)
+            return [sql,value]
+        else:
+            return False

@@ -12,12 +12,13 @@ class mysqlcon:
             user=dblogin["user"],
             password=dblogin["password"],
             database=dblogin["database"],
+            autocommit=True
         )
         self.cursor = self.db.cursor()
         self.debug = True
 
-    def __del__(self):
-        self.db.close()
+    # def __del__(self):
+    #     self.db.close()
     
     def validate(self):
         tick = time.time()

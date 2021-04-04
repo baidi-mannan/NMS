@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Pangolin&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/manager/styleupdate.css') }}">
+    <title>UPDATE DONOR PROFILE</title>
+</head>
+<body>
+    
+    <form class = "form__chooseDonor"name = "chooseDonorForm" method="POST" action="" onsubmit="var myElement = document.getElementById('chooseDonorButton'); myElement.innerText = 'Choosing ...'">
+        <select name="donorUserName">
+            {% for dusername in inputs %}
+                <option value="{{ dusername }}">{{ dusername }}</option>
+            {% endfor %}
+        </select>
+        <button name = formName id = 'chooseDonorButton' type="submit" value="chooseDonor">Choose</button>
+    </form>
+    <div class="body">
+        
+        
+        {% if user != None  %}
+        <div class="forms">
+            <div class="form1">     
+                <form name="profileForm" method="post" action="" onsubmit="var myElement = document.getElementById('infosubmit'); myElement.disabled=true; myElement.innerText='Saving…'; ">
+
+                    <h3> Update Donor {{user['name']}}'s Details</h3>
+                
+                    <div>
+                        <label for="name">Name:</label><br>
+                        <input type="text" id="name" name="name" value="{{user['name']}}" required>
+                    </div>
+                    <div>
+                        <label for="userName">User Name:</label><br>
+                        <input type="text"id="userName" name="userNameD" class="permanent" value="{{user['userName']}}" disabled>
+                        <input type="hidden" name="userName"  value="{{user['userName']}}" >
+                    </div>
+                    <div>
+                        <label for="email">Email Id:</label><br>
+                        <input type="email"id = "email"name ="email" value="{{user['email']}}" required >
+                    </div>
+                    <div>
+                        <label for="phone">Phone No:</label><br>
+                        <input type="text" pattern= "[6-9]{1}[0-9]{9}"id = "phone"name ="phone" value="{{user['phone']}}"oninvalid="setCustomValidity('Please enter a 10 digit number,starting with 6,7,8,9 ')"
+                        onchange="try{setCustomValidity('')}catch(e){alert(e)}" required >
+                    </div>
+                    <input type="hidden" name = "formName" value="updateProfile"/>
+                    <div>
+                        <label>Membership:</label><br>
+                    <select name="membership" id="membership">
+                    {%if user["membership"]%}
+   
+                        <option value="1" selected>SEMI ANNUALY</option>
+                        <option value="0" >ANNUALY</option>
+                    {% else%}  
+                        <option value="1">SEMI ANNUALY</option>
+                        <option value="0" selected>ANNUALY</option>
+
+                    {%endif%}
+                    </select>
+                    </div>
+                    <button name="button" id="infosubmit" type="submit" value="save"> Save Changes</button>
+                    
+                </form>
+            </div>
+            <div class="form2">
+                <form method="post" action="" onsubmit="var myElement = document.getElementById('changePasswordbutton'); myElement.disabled=true; myElement.innerText = 'Verifying..'">
+                    <h3> Change Password</h3>
+                    <div>
+                        <label for="oldPassword">Old Password:</label><br>
+                        <input type="password" id="oldPassword"name="oldPassword" placeholder="Your old password..." required>
+                        <input type="hidden" name="userName"  value="{{user['userName']}}" >
+                    </div>
+                    <div>
+                        <label for="newPassword">New Password:</label><br>
+                    <input type="password" id="newPassword"name="newPassword" placeholder="Your new password..." required>
+                    </div>
+                    <div>
+                        <label for="reNewPassword">Re-enter New Password:</label><br>
+                    <input type="password" id = "reNewPassword"name="reNewPassword" placeholder="Renter new password...">
+                    </div>
+                    <input type="hidden" name = "formName" value="changePassword"/>
+                    <button name ="button" id="changePasswordbutton" type="submit" value="changePassword" >CHANGE PASSWORD</button>
+
+                </form>
+            </div>
+    </div>
+    <div class ="options"> 
+    
+        <button name ="button" type="button"onClick="document.location = 'managerprofilepage'">Discard Changes</button>
+    </div>
+    {% endif %}
+  </div>    
+  
+
+  <script>
+    var password = document.getElementById("newPassword"), confirm_password = document.getElementById("reNewPassword");
+    // var phone = document.getElementById("phone");
+    function validatePassword(){
+    if(password.value != confirm_password.value) {
+        confirm_password.setCustomValidity("Passwords Don't Match");
+    } else {
+        confirm_password.setCustomValidity('');
+    }
+    }
+    password.onchange = validatePassword;
+    confirm_password.onkeyup = validatePassword;
+</script>
+</body>
+</html>

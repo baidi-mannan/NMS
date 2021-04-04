@@ -49,8 +49,8 @@ h1{
         
     }
   .options button
-  {   height: 40px;
-      width: 150px;
+  {   height: max-content;
+      width: max-content;
       color: whitesmoke;
       font-size: 15px;
   }    

@@ -11,3 +11,6 @@ from SupportModules.staff import Staff
 from SupportModules.manager import Manager
 from SupportModules.checkNewData import checkNewData
 from SupportModules.checkNewData import checkPassword
+from SupportModules.requirement import Requirement
+from SupportModules.fund import NgoBank
+from SupportModules.help import Help

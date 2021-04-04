@@ -1,9 +1,11 @@
 from SupportModules import Item,ItemType
 import sys
 import mysql.connector
+import time
 class Inventory:
     # def __init__(self,dblogin:dict):
     def __init__(self, mysql):
+        self.debug =True
         self.__freq = {}
         for itm in ItemType:
             self.__freq[itm.name] = 0
@@ -63,3 +65,45 @@ class Inventory:
         for x in myresult:
             print(f"{x[1]} : {x[2]}")
 
+    def UpdatePriceList(self, priceList:dict):
+        tick = time.time()
+        listOfTuples = [(v,k) for k,v in priceList.items()]
+        stmt = """update inventory SET price = %s where itemname = %s"""
+        self.cursor = self.mysql.connection.cursor()
+        self.cursor.executemany(stmt,listOfTuples)
+        self.mysql.connection.commit()
+        if(self.debug):
+            print(f"Time taken to update Price {time.time() - tick}",file = sys.stderr)
+        return self.cursor.rowcount
+    def AddMultiple(self, freq:dict):
+        # need perfect key as itemname
+        tick = time.time()
+        listOfTuples = [(v,k) for k,v in freq.items()]
+        stmt = """update inventory SET frequency = %s + frequency where itemname = %s"""
+        self.cursor = self.mysql.connection.cursor()
+        self.cursor.executemany(stmt,listOfTuples)
+        self.mysql.connection.commit()
+        if(self.debug):
+            print(f"Time taken to Add {time.time() - tick}",file = sys.stderr)
+        return self.cursor.rowcount
+    def RemoveMultiple(self, freq:dict):
+        # need perfect key as itemname
+        tick = time.time()
+        listOfTuples = [(v,k) for k,v in freq.items()]
+        stmt = """update inventory SET frequency = frequency - %s where itemname = %s"""
+        self.cursor = self.mysql.connection.cursor()
+        self.cursor.executemany(stmt,listOfTuples)
+        self.mysql.connection.commit()
+        if(self.debug):
+            print(f"Time taken to Remove {time.time() - tick}",file = sys.stderr)
+        return self.cursor.rowcount
+
+    def getPriceDict(self):
+        self.cursor = self.mysql.connection.cursor()
+        self.cursor.execute(
+            "select itemname,price from inventory",
+            ()
+        )
+        priceList = self.cursor.fetchall()
+        priceDict = dict(priceList)
+        return priceDict
