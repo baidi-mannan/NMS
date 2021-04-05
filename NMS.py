@@ -102,7 +102,7 @@ def donorLogin():
             # cur.execute("""truncate donorList""")
 
             mysql.connection.commit()
-            return render_template("donorRegister.html", userName=donorDetails["name"])
+            return render_template("donor/donorRegister.html", userName=donorDetails["name"])
 
         if request.form["button"] == "login":
             userName = donorDetails["userName"]
@@ -505,6 +505,7 @@ def updateDonorProfile():
 @manager_login_required
 def managershowstudentlist():
     headerName = (
+        "ID",
         "Name",
         "Class",
         "Roll Number",
@@ -520,7 +521,7 @@ def managershowstudentlist():
     print(priceDict, file=sys.stderr)
     query = mysqlc.select(
         [
-            "select Name,Class,rollnumber,lastmarks,familyincome,contactnumber,(requirement_fees+%s*requirement_book + %s*requirement_bag + %s*requirement_shoes + %s*requirement_clothes)  from studentlist order by class",
+            "select id,Name,Class,rollnumber,lastmarks,familyincome,contactnumber,(requirement_fees+%s*requirement_book + %s*requirement_bag + %s*requirement_shoes + %s*requirement_clothes)  from studentlist order by id",
             (
                 priceDict["BOOK"],
                 priceDict["BAG"],
@@ -894,8 +895,7 @@ def managerupdatedonor():
 @manager_login_required
 def managerhelpstudents():
     req = Requirement(mysql)
-    infoDict = req(forPrinting=False)
-
+    infoDict = req(forPrinting = False)
     AvailFunds = ngobank.getFunds()
     infoDict["AVA"] = AvailFunds
     infoDict["userName"] = session["User"]["userName"]
@@ -934,20 +934,15 @@ def managerhelpstudents():
             #             ()
             #     ]
             # )
-            return redirect(url_for("managershowhelp", donationid=donationid))
 
-    if infoDict["REQ"] == 0:
-        return render_template(
-            "manager/managerHelpStudents.html",
-            title="All helps fulfilled",
-            infoDict=infoDict,
-        )
-    if infoDict["REQ"] <= AvailFunds:
-        return render_template(
-            "manager/managerHelpStudents.html",
-            title="Sufficient Funds",
-            infoDict=infoDict,
-        )
+            return redirect(url_for('managershowhelp',donationid = donationid))
+        if request.form.get('DONATION') == 'Insufficient':
+            donationid = Help(mysql).InSufficientFulfil(infoDict,request.form['Priority'])
+            return redirect(url_for('managershowhelp',donationid = donationid))
+    if infoDict['REQ'] == 0:
+        return render_template("manager/managerHelpStudents.html",title = "All helps fulfilled", infoDict = infoDict)
+    if(infoDict['REQ']<= AvailFunds):
+        return render_template("manager/managerHelpStudents.html",title = "Sufficient Funds", infoDict = infoDict)
     else:
         return render_template(
             "manager/managerHelpStudents.html",
@@ -992,8 +987,10 @@ def managershowhelp():
                 requirement_shoes,
                 requirement_clothes,
                 date(processedTimestamp)
-                from completedhelp order by donationid,id;""",
-            (),
+
+                from completedhelp order by donationid desc,id
+                ;""",
+            ()
         ]
     )
 
@@ -1004,6 +1001,187 @@ def managershowhelp():
         donationid=donationid,
     )
 
+@app.route("/manager-manage-staff",methods = ["GET","POST"])
+@manager_login_required
+def managermanagestaff():
+    global mysqlc
+    if request.method == "POST":
+        if request.form.get('formName') == None and request.form.get('pageOption') != "Remove Staff":
+            return render_template ('manager/managerManageStaff.html',user = None,status = 1,option = request.form)
+        if request.form.get('formName') == None and request.form.get('pageOption') == "Remove Staff":
+            query = mysqlc.select([
+                "select userName from stafflist where role = 'staff';",
+                ()
+            ])
+            if(len(query)==0):
+                return "No staff(s) in NGO"
+            staffuserNameList = [row[0] for row in query]
+            return render_template ('manager/managerManageStaff.html',user = staffuserNameList,status = 1,option= request.form)
+            
+        if request.form.get('formName') == "Register Staff" :
+            sinfo = request.form
+            query = mysqlc.select(
+                [
+                    """select 
+                    COALESCE(sum(userName=%s),0), COALESCE(sum(email = %s),0) ,COALESCE(sum(contactnumber = %s),0)
+                    from stafflist 
+                    where userName = %s or email = %s or contactnumber = %s;
+                    """,
+                    (sinfo['userName'],sinfo['email'],sinfo['phone'],sinfo['userName'],sinfo['email'],sinfo['phone'],)
+                ]
+            )
+            if query[0][0] + query[0][1] + query[0][2]>0 :
+                errorMessage = ""
+                if(query[0][0]>0):
+                    errorMessage = errorMessage + "userName Already taken,"
+                if(query[0][1]>0):
+                    errorMessage = errorMessage + "email Already present in database,"
+                if(query[0][2]>0):
+                    errorMessage = errorMessage + "Phone number present in database,"
+                errorMessage = errorMessage + " Please give new details"
+                return errorMessage
+            s = Staff(sinfo['name'], sinfo['userName'], Contact(sinfo['email'], sinfo['phone']), sinfo['password_1'])
+            mysqlc.exeandcommit(
+                s.getsqlandvalues()
+            )
+            return "Successful Staff registration"
+        if request.form.get('formName') == 'Remove Staff':
+            query = mysqlc.select([
+                "select userName from stafflist where userName = %s;",
+                (request.form.get('staffUserName'),)
+            ])
+            if(len(query)==0):
+                return "Staff Already Removed from NGO"
+            mysqlc.exeandcommit([
+                "DELETE FROM stafflist WHERE userName = %s",
+                (request.form.get('staffUserName'),)
+            ])
+            return f"{request.form.get('staffUserName')} Removed from NGO!"
+    return render_template ('manager/managerManageStaff.html',user = None,status = None)
+
+@app.route("/manager-register-student", methods=["GET", "POST"])
+@manager_login_required
+def managerregisterStudent():
+    global mysqlc
+    if request.method == "POST":
+        mysqlc.registerStudent(request.form)
+
+        return "STUDENT REGISTERED"
+    return render_template("staff/registerStudent.html", user=session["User"])
+
+@app.route("/manager-manage-student")
+@manager_login_required
+def managermanagestudent():
+    return render_template("manager/managerManageStudent.html")
+
+@app.route("/manager-update-student", methods=["GET", "POST"])
+@manager_login_required
+def managerupdatestudent():
+    global mysqlc
+    query = mysqlc.select(["select id,name from studentlist", ()])
+    inputs = [[row[0],row[1]] for row in query]
+
+    if request.method == "POST":
+        if request.form["formName"] == "chooseStudent":
+            query = mysqlc.select(
+                [
+                    """select 
+                    id,
+                    name,
+                    class,
+                    requirement_fees,
+                    requirement_book,
+                    requirement_bag,
+                    requirement_shoes,
+                    requirement_clothes,
+                    email,
+                    rollnumber,
+                    contactnumber,
+                    lastmarks,
+                    gender,
+                    familyincome 
+                    from studentlist where id = %s""",
+                    (request.form["studentID"],),
+                ]
+            )
+
+            user = {
+                "id": query[0][0],
+                "name": query[0][1],
+                "class": query[0][2],
+                "requirement_fees": query[0][3],
+                'requirement_book':query[0][4],
+                'requirement_bag':query[0][5],
+                'requirement_shoes':query[0][6],
+                'requirement_clothes':query[0][7],
+                'email':query[0][8],
+                'rollnumber':query[0][9],
+                'contactnumber':query[0][10],
+                'lastmarks':query[0][11],
+                'gender':query[0][12],
+                'familyincome':query[0][13],
+            }
+            return render_template(
+                "manager/managerUpdateStudent.html", inputs=inputs, user=user
+            )
+        if request.form["formName"] == "updateProfile":
+            userInfo = request.form
+            sinfo = request.form
+            query = mysqlc.select(
+                [
+                    """select 
+                    COALESCE(sum(email = %s),0) ,COALESCE(sum(contactnumber = %s),0)
+                    from studentlist 
+                    where (email = %s or contactnumber = %s) and id != %s ;
+                    """,
+                    (sinfo['email'],sinfo['contactnumber'],sinfo['email'],sinfo['contactnumber'],int(sinfo['id']))
+                ]
+            )
+            if query[0][0] + query[0][1]>0 :
+                errorMessage = ""
+                if(query[0][0]>0):
+                    errorMessage = errorMessage + "email Already present in database,"
+                if(query[0][1]>0):
+                    errorMessage = errorMessage + "Phone number present in database,"
+                errorMessage = errorMessage + " Please give new details"
+                return errorMessage
+            mysqlc.updateStudent(request.form)
+            return "Profile Updated Successfully"
+        if request.form["formName"] == "changePassword":
+            userInfo = request.form
+            query = mysqlc.select(
+                [
+                    "select name,email,contactnumber,userName,membership,password from donorList where username = %s",
+                    (userInfo["userName"],),
+                ]
+            )
+            user = {
+                "name": query[0][0],
+                "email": query[0][1],
+                "phone": query[0][2],
+                "userName": query[0][3],
+                "membership": query[0][4],
+            }
+            donor = Donor(
+                user["name"],
+                user["userName"],
+                Contact(user["email"], user["phone"]),
+                query[0][5],
+                int(user["membership"]),
+            )
+            # return str(query[0][5] == userInfo['oldPassword'])
+            stmt = donor.checkAndUpdatePasswordsqlandvalues(
+                userInfo["oldPassword"], userInfo["newPassword"]
+            )
+            if stmt is not False:
+                mysqlc.exeandcommit(stmt)
+                return "Password chaned Successfully"
+            else:
+                return "wrong password"
+        return request.form
+    return render_template(
+                "manager/managerUpdateStudent.html", inputs=inputs, user=None
+            )
 
 if __name__ == "__main__":
     app.run(debug=True)

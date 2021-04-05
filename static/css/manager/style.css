@@ -101,6 +101,9 @@ h1{
 .table__header{
     text-align: left;
 }
+.table__row__selected{
+    background-color: #8db6f3d5;
+}
 .table__row{
     transition: 0.2s;
 }
