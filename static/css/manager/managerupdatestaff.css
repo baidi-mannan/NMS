@@ -35,6 +35,14 @@ body {
   
   
   }
+  .form__student
+  {
+    height: fit-content;
+  }
+  .form__student div
+  {
+    height: fit-content;
+  }
   
   form div input{
   
