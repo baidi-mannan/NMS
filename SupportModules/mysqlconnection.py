@@ -16,7 +16,7 @@ class mysqlcon:
             autocommit=True,
         )
         self.cursor = self.db.cursor()
-        self.debug = True
+        self.debug = False
 
     # def __del__(self):
     #     self.db.close()
@@ -65,7 +65,7 @@ class mysqlcon:
         return strArr
 
     def registerStudent(self, details, staff):
-        print(details)
+        # print(details)
 
         self.cursor.execute(
             """INSERT INTO studentlist(name,class,requirement_fees,requirement_book,requirement_bag,requirement_shoes,requirement_clothes,email,rollnumber,contactnumber,lastmarks,gender,familyincome,registeredBy) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",

@@ -4,7 +4,7 @@ import time
 class NgoBank:
     # def __init__(self,dblogin:dict):
     def __init__(self, mysql):
-        self.debug =True
+        self.debug =False
         self.mysql = mysql
     def deposit(self, userName,userType, amount, message=""):
         tick = time.time()

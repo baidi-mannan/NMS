@@ -29,17 +29,19 @@
 
     <form method="post" action="">
       
-        <input type="text" name="name" placeholder="Enter your Name">
+        <input type="text" name="name" placeholder="Enter your Name" required>
       
-        <input type="text" name="email" placeholder="Enter your Email ID">
+        <input type="email" name="email" placeholder="Enter your Email ID">
        
-        <input type="text" name="userName" placeholder="Enter your Username">
+        <input type="text" name="userName" placeholder="Enter your Username" required>
     
-        <input type="password" name="password" placeholder="Enter your password">
+        <input type="password" id ="password" name="password" placeholder="Enter your password" required>
        
-        <input type="password" name="rePassword" placeholder="Renter your password">
+        <input type="password" id = "rePassword"name="rePassword" placeholder="Renter your password">
         
-        <input type="text" name="contactNumber"  placeholder= "Enter your Contact Number">
+        <!-- <input type="text" name="contactNumber"  placeholder= "Enter your Contact Number"> -->
+        <input type="text" pattern= "[6-9]{1}[0-9]{9}"id = "contactNumber"name ="contactNumber" placeholder="Enter Valid Phone" oninvalid="setCustomValidity('Please enter a 10 digit number,starting with 6,7,8,9 ')"
+                    onchange="try{setCustomValidity('')}catch(e){alert(e)}" required >
         <p> NOTE: you cannot change your username after registering</p>
 
         <button name="button" value="register">REGISTER</button>
@@ -47,5 +49,18 @@
 
     </form>
  </div>
+ <script>
+    var password = document.getElementById("password"), confirm_password = document.getElementById("rePassword");
+    // var phone = document.getElementById("phone");
+    function validatePassword(){
+    if(password.value != confirm_password.value) {
+        confirm_password.setCustomValidity("Passwords Don't Match");
+    } else {
+        confirm_password.setCustomValidity('');
+    }
+    }
+    password.onchange = validatePassword;
+    confirm_password.onkeyup = validatePassword;
+    </script>
 </body>
 </html>

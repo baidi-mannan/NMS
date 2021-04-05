@@ -2,7 +2,7 @@ from SupportModules import Contact,Password
 import sys
 class Donor:
     def __init__(self,name:str, username:str,contact:Contact, passwd:str,membership = 1,ecrypted=False):
-        self.debug = True
+        self.debug = False
         self.name = name
         self.username = username
         self.contact = Contact(contact.emailid,contact.phone)

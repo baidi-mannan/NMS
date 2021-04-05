@@ -40,7 +40,7 @@ def staff_login_required(f):
         if ("User" in session) and (session["User"]["type"] == "staff"):
             return f(*args, **kwargs)
         else:
-            print("You need to login first", file=sys.stderr)
+            # print("You need to login first", file=sys.stderr)
             return redirect("/staff-login")
 
     return wrap
@@ -52,7 +52,7 @@ def donor_login_required(f):
         if ("User" in session) and (session["User"]["type"] == "donor"):
             return f(*args, **kwargs)
         else:
-            print("You need to login first", file=sys.stderr)
+            # print("You need to login first", file=sys.stderr)
             return redirect("/donor-login")
 
     return wrap
@@ -64,7 +64,7 @@ def manager_login_required(f):
         if ("User" in session) and (session["User"]["type"] == "manager"):
             return f(*args, **kwargs)
         else:
-            print("You need to login first", file=sys.stderr)
+            # print("You need to login first", file=sys.stderr)
             return redirect("/manager-login")
 
     return wrap
@@ -119,7 +119,9 @@ def donorLogin():
             )
 
             if len(query) == 0:
-                return "<h5> NO SUCH USERNAME EXISTS<br> PLEASE TRY AGAIN</h5>"
+                # return "<h5> NO SUCH USERNAME EXISTS<br> PLEASE TRY AGAIN</h5>"
+                return render_template("GeneralMessage.html",message="NO SUCH USERNAME EXISTS PLEASE TRY AGAIN")
+
             else:
                 # if(query[0][3] == Password(password).getEncryptedPassword()):
                 if query[0][3] == password:
@@ -136,8 +138,8 @@ def donorLogin():
                     }
                     return redirect(url_for("donorprofilepage"))
                 else:
-                    return "<h5> INCORRECT PASSWORD<br> PLEASE TRY AGAIN</h5>"
-
+                    # return "<h5> INCORRECT PASSWORD<br> PLEASE TRY AGAIN</h5>"
+                    return render_template("GeneralMessage.html",message="INCORRECT PASSWORD PLEASE TRY AGAIN")
     return render_template("donor/donorLogin.html", userType="donor")
 
 
@@ -160,9 +162,10 @@ def staffLogin():
                 (userName,),
             ]
         )
-        print(query)
+        # print(query)
         if len(query) == 0:
-            return "<h5> NO SUCH USERNAME EXISTS<br> PLEASE TRY AGAIN</h5>"
+            # return "<h5> NO SUCH USERNAME EXISTS<br> PLEASE TRY AGAIN</h5>"
+            return render_template("GeneralMessage.html",message="NO SUCH USERNAME EXISTS! PLEASE TRY AGAIN")
         else:
             # if(query[0][3] == Password(password).getEncryptedPassword()):
             if query[0][3] == password:
@@ -179,8 +182,8 @@ def staffLogin():
                 return redirect(url_for("staffprofilepage"))
 
             else:
-                return "<h5> INCORRECT PASSWORD<br> PLEASE TRY AGAIN</h5>"
-
+                # return "<h5> INCORRECT PASSWORD<br> PLEASE TRY AGAIN</h5>"
+                return render_template("GeneralMessage.html",message="INCORRECT PASSWORD! PLEASE TRY AGAIN")
     return render_template("staff/staffLogin.html", userType="staff")
 
 
@@ -217,7 +220,8 @@ def updateStaffProfile():
             session["User"]["contactNumber"] = staffDetails["contactNumber"]
 
             session.modified = True
-            return "<h5> USER DEATILS CHANGED</h5>"
+            # return "<h5> USER DEATILS CHANGED</h5>"
+            return render_template("GeneralMessage",message = "USER DEATILS CHANGED")
         if request.form["button"] == "changePassword":
             inputs = request.form
             if session["User"]["pw"] == inputs["oldPassword"]:
@@ -230,7 +234,7 @@ def updateStaffProfile():
                             userID,
                         ),
                     )
-                    print(inputs["newPassword"])
+                    # print(inputs["newPassword"])
                     mysql.connection.commit()
                     session.pop("User", None)
                     return redirect(url_for("staffLogin"))
@@ -247,9 +251,36 @@ def updateStaffProfile():
 def registerStudent():
     global mysqlc
     if request.method == "POST":
+        sinfo = request.form
+        # return request.form
+        query = mysqlc.select(
+            [
+                """select 
+                COALESCE(sum(email = %s),0) ,COALESCE(sum(contactnumber = %s),0)
+                from studentlist 
+                where (email = %s or contactnumber = %s)  ;
+                """,
+                (
+                    sinfo["email"],
+                    sinfo["contactNumber"],
+                    sinfo["email"],
+                    sinfo["contactNumber"],
+                ),
+            ]
+        )
+        if query[0][0] + query[0][1] > 0:
+            errorMessage = ""
+            if query[0][0] > 0:
+                errorMessage = errorMessage + "email Already present in database,"
+            if query[0][1] > 0:
+                errorMessage = errorMessage + "Phone number present in database,"
+            errorMessage = errorMessage + " Please give new details"
+            # return errorMessage
+            return render_template("GeneralMessage.html", message= errorMessage)
         mysqlc.registerStudent(request.form, session["User"]["userName"])
 
-        return "STUDENT REGISTERED"
+        # return "STUDENT REGISTERED"
+        return render_template("GeneralMessage.html", message= "STUDENT REGISTERED")
     return render_template("staff/registerStudent.html", user=session["User"])
 
 
@@ -289,6 +320,91 @@ def makePaymentbyStaff():
         return "<h5>THANK YOU FOR CONTRIBUTING</h5>"
     return render_template("donor/makePayment.html")
 
+@app.route("/staff-update-student", methods=["GET", "POST"])
+@staff_login_required
+def staffupdatestudent():
+    global mysqlc
+    query = mysqlc.select(["select id,name from studentlist", ()])
+    inputs = [[row[0], row[1]] for row in query]
+
+    if request.method == "POST":
+        if request.form["formName"] == "chooseStudent":
+            query = mysqlc.select(
+                [
+                    """select 
+                    id,
+                    name,
+                    class,
+                    requirement_fees,
+                    requirement_book,
+                    requirement_bag,
+                    requirement_shoes,
+                    requirement_clothes,
+                    email,
+                    rollnumber,
+                    contactnumber,
+                    lastmarks,
+                    gender,
+                    familyincome 
+                    from studentlist where id = %s""",
+                    (request.form["studentID"],),
+                ]
+            )
+
+            user = {
+                "id": query[0][0],
+                "name": query[0][1],
+                "class": query[0][2],
+                "requirement_fees": query[0][3],
+                "requirement_book": query[0][4],
+                "requirement_bag": query[0][5],
+                "requirement_shoes": query[0][6],
+                "requirement_clothes": query[0][7],
+                "email": query[0][8],
+                "rollnumber": query[0][9],
+                "contactnumber": query[0][10],
+                "lastmarks": query[0][11],
+                "gender": query[0][12],
+                "familyincome": query[0][13],
+            }
+            return render_template(
+                "staff/staffUpdateStudent.html", inputs=inputs, user=user
+            )
+        if request.form["formName"] == "updateProfile":
+            userInfo = request.form
+            sinfo = request.form
+            query = mysqlc.select(
+                [
+                    """select 
+                    COALESCE(sum(email = %s),0) ,COALESCE(sum(contactnumber = %s),0)
+                    from studentlist 
+                    where (email = %s or contactnumber = %s) and id != %s ;
+                    """,
+                    (
+                        sinfo["email"],
+                        sinfo["contactnumber"],
+                        sinfo["email"],
+                        sinfo["contactnumber"],
+                        int(sinfo["id"]),
+                    ),
+                ]
+            )
+            if query[0][0] + query[0][1] > 0:
+                errorMessage = ""
+                if query[0][0] > 0:
+                    errorMessage = errorMessage + "email Already present in database,"
+                if query[0][1] > 0:
+                    errorMessage = errorMessage + "Phone number present in database,"
+                errorMessage = errorMessage + " Please give new details"
+                # return errorMessage
+                return render_template("GeneralMessage.html", message = errorMessage)
+            mysqlc.updateStudent(request.form)
+            # return "Profile Updated Successfully"
+            return render_template("GeneralMessage.html", message = "Profile Updated Successfully")
+    return render_template(
+        "staff/staffUpdateStudent.html", inputs=inputs, user=None
+    )
+
 
 @app.route("/stafflogout")
 @staff_login_required
@@ -314,7 +430,8 @@ def managercheckpassword():
         ]
     )
     if len(query) == 0:
-        return json.dumps({"statusCode": -1, "message": "User doesn't exist"})
+        # return json.dumps({"statusCode": -1, "message": "User doesn't exist"})
+        return render_template("GeneralMessage.html", message = "User doesn't exist")
     else:
         if query[0][3] == Password(password).getEncryptedPassword():
 
@@ -327,7 +444,8 @@ def managercheckpassword():
 
             return redirect("/managerprofilepage")
         else:
-            return json.dumps({"statusCode": -2, "message": f"Wrong password"})
+            # return json.dumps({"statusCode": -2, "message": f"Wrong password"})
+            return render_template("GeneralMessage.html", message = "Wrong password")
     return json.dumps({"statusCode": 1, "message": "Success"})
 
 
@@ -349,7 +467,7 @@ def managerlogout():
 @app.route("/donorprofilepage")
 @donor_login_required
 def donorprofilepage():
-    print(f"session['User'] = {session['User']}", file=sys.stderr)
+    # print(f"session['User'] = {session['User']}", file=sys.stderr)
     return render_template("donor/donorProfilePage.html", Userdetails=session["User"])
 
 
@@ -389,8 +507,8 @@ def makePayment():
         )
         # cur.execute("commit")
         mysql.connection.commit()
-        return "<h5>THANK YOU FOR CONTRIBUTING</h5>"
-
+        # return "<h5>THANK YOU FOR CONTRIBUTING</h5>"
+        return render_template("GeneralMessage.html",message="THANK YOU FOR CONTRIBUTING")
     return render_template("donor/makePayment.html")
 
 
@@ -401,7 +519,7 @@ def donateItem():
     if request.method == "POST":
         global inventory
         donation = request.form
-        print(donation, file=sys.stderr)
+        # print(donation, file=sys.stderr)
         donated = False
         donationfreq = int(donation["book"])
         if donationfreq > 0:
@@ -459,7 +577,8 @@ def updateDonorProfile():
             session["User"]["contactNumber"] = donorDetails["contactNumber"]
             session["User"]["membership"] = member
             session.modified = True
-            return "<h5> USER DEATILS CHANGED</h5>"
+            # return "<h5> USER DEATILS CHANGED</h5>"
+            return render_template("GeneralMessage.html", message = "USER DEATILS CHANGED")
         if request.form["button"] == "changePassword":
             inputs = request.form
             if session["User"]["pw"] == inputs["oldPassword"]:
@@ -472,7 +591,7 @@ def updateDonorProfile():
                             userID,
                         ),
                     )
-                    print(inputs["newPassword"])
+                    # print(inputs["newPassword"])
                     mysql.connection.commit()
                     session.pop("User", None)
                     return redirect(url_for("donorLogin"))
@@ -492,7 +611,7 @@ def updateDonorProfile():
         #             (session["User"]["userName"],),
         #         ]
         #     )
-        # print(f"Query Took {time.time()-tick}",file=sys.stderr)
+        # # print(f"Query Took {time.time()-tick}",file=sys.stderr)
         # user={}
         # user['name']=query[0][2]
         # user['userName']=query[0][1]
@@ -514,16 +633,17 @@ def managershowstudentlist():
         "Last Marks",
         "Family Income",
         "Contact Number",
+        "Registered By",
         "Help Required(Rs.)",
     )
     global mysqlc
     priceList = mysqlc.select(["select itemname,price from inventory", ()])
 
     priceDict = dict(priceList)
-    print(priceDict, file=sys.stderr)
+    # print(priceDict, file=sys.stderr)
     query = mysqlc.select(
         [
-            "select id,Name,Class,rollnumber,lastmarks,familyincome,contactnumber,(requirement_fees+%s*requirement_book + %s*requirement_bag + %s*requirement_shoes + %s*requirement_clothes)  from studentlist order by id",
+            "select id,Name,Class,rollnumber,lastmarks,familyincome,contactnumber,registeredBy,(requirement_fees+%s*requirement_book + %s*requirement_bag + %s*requirement_shoes + %s*requirement_clothes)  from studentlist order by id",
             (
                 priceDict["BOOK"],
                 priceDict["BAG"],
@@ -533,7 +653,7 @@ def managershowstudentlist():
         ]
     )
 
-    print(query, file=sys.stderr)
+    # print(query, file=sys.stderr)
 
     return render_template(
         "manager/showStudent.html", headerName=headerName, query=query
@@ -549,7 +669,7 @@ def managershowstafflist():
         ["select id,name,email,contactnumber from stafflist where role = 'staff'", ()]
     )
 
-    print(query, file=sys.stderr)
+    # print(query, file=sys.stderr)
 
     return render_template("manager/showStaff.html", headerName=headerName, query=query)
 
@@ -572,11 +692,11 @@ def managershowdonorlist():
         ]
     )
 
-    print(query, file=sys.stderr)
+    # print(query, file=sys.stderr)
 
     return render_template("manager/showDonor.html", headerName=headerName, query=query)
 
-    print(query, file=sys.stderr)
+    # print(query, file=sys.stderr)
 
     return render_template("manager/showStaff.html", headerName=headerName, query=query)
 
@@ -592,7 +712,7 @@ def managershowfunds():
         ]
     )
 
-    print(query, file=sys.stderr)
+    # print(query, file=sys.stderr)
 
     return render_template("manager/showFunds.html", BalanceFund=query[0][0])
 
@@ -606,7 +726,7 @@ def managershowinventorylist():
         ["select itemname,frequency,price from inventory order by itemid", ()]
     )
 
-    print(query, file=sys.stderr)
+    # print(query, file=sys.stderr)
 
     return render_template(
         "manager/showInventory.html", headerName=headerName, query=query
@@ -719,7 +839,7 @@ def managerbuyitem():
                 )
             )
             # return render_template("manager/managerBuyItem.html",priceDict = priceDict,status = -2,bamount = orderRequiredAmount, funds= funds)
-        print(orderForm, file=sys.stderr)
+        # print(orderForm, file=sys.stderr)
         inventory.AddMultiple(orderForm)
         ngobank.withdraw(
             session["User"]["userName"],
@@ -791,7 +911,7 @@ def updatemanagerprofile():
 
             if slqandval is not False:
                 mysqlc.exeandcommit(slqandval)
-                print((request.form["newPassword"], slqandval), file=sys.stderr)
+                # print((request.form["newPassword"], slqandval), file=sys.stderr)
                 return redirect(url_for("managerlogout"))
             else:
                 return "Wrong Password"
@@ -1107,9 +1227,35 @@ def managermanagestaff():
 def managerregisterStudent():
     global mysqlc
     if request.method == "POST":
-        mysqlc.registerStudent(request.form)
+        sinfo = request.form
+        query = mysqlc.select(
+            [
+                """select 
+                COALESCE(sum(email = %s),0) ,COALESCE(sum(contactnumber = %s),0)
+                from studentlist 
+                where (email = %s or contactnumber = %s) ;
+                """,
+                (
+                    sinfo["email"],
+                    sinfo["contactNumber"],
+                    sinfo["email"],
+                    sinfo["contactNumber"],
+                ),
+            ]
+        )
+        if query[0][0] + query[0][1] > 0:
+            errorMessage = ""
+            if query[0][0] > 0:
+                errorMessage = errorMessage + "email Already present in database,"
+            if query[0][1] > 0:
+                errorMessage = errorMessage + "Phone number present in database,"
+            errorMessage = errorMessage + " Please give new details"
+            # return errorMessage
+            return render_template("GeneralMessage.html", message= errorMessage)
+        mysqlc.registerStudent(request.form,session['User']['userName'])
 
-        return "STUDENT REGISTERED"
+        # return "STUDENT REGISTERED"
+        return render_template("GeneralMessage.html", message= "STUDENT REGISTERED")
     return render_template("staff/registerStudent.html", user=session["User"])
 
 
@@ -1195,41 +1341,11 @@ def managerupdatestudent():
                 if query[0][1] > 0:
                     errorMessage = errorMessage + "Phone number present in database,"
                 errorMessage = errorMessage + " Please give new details"
-                return errorMessage
+                # return errorMessage
+                return render_template("GeneralMessage.html", message = errorMessage)
             mysqlc.updateStudent(request.form)
-            return "Profile Updated Successfully"
-        if request.form["formName"] == "changePassword":
-            userInfo = request.form
-            query = mysqlc.select(
-                [
-                    "select name,email,contactnumber,userName,membership,password from donorList where username = %s",
-                    (userInfo["userName"],),
-                ]
-            )
-            user = {
-                "name": query[0][0],
-                "email": query[0][1],
-                "phone": query[0][2],
-                "userName": query[0][3],
-                "membership": query[0][4],
-            }
-            donor = Donor(
-                user["name"],
-                user["userName"],
-                Contact(user["email"], user["phone"]),
-                query[0][5],
-                int(user["membership"]),
-            )
-            # return str(query[0][5] == userInfo['oldPassword'])
-            stmt = donor.checkAndUpdatePasswordsqlandvalues(
-                userInfo["oldPassword"], userInfo["newPassword"]
-            )
-            if stmt is not False:
-                mysqlc.exeandcommit(stmt)
-                return "Password chaned Successfully"
-            else:
-                return "wrong password"
-        return request.form
+            # return "Profile Updated Successfully"
+            return render_template("GeneralMessage.html", message = "Profile Updated Successfully")
     return render_template(
         "manager/managerUpdateStudent.html", inputs=inputs, user=None
     )
