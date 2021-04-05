@@ -64,10 +64,11 @@ class mysqlcon:
 
         return strArr
 
-    def registerStudent(self, details):
+    def registerStudent(self, details, staff):
         print(details)
+
         self.cursor.execute(
-            """INSERT INTO studentlist(name,class,requirement_fees,requirement_book,requirement_bag,requirement_shoes,requirement_clothes,email,rollnumber,contactnumber,lastmarks,gender,familyincome) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+            """INSERT INTO studentlist(name,class,requirement_fees,requirement_book,requirement_bag,requirement_shoes,requirement_clothes,email,rollnumber,contactnumber,lastmarks,gender,familyincome,registeredBy) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
             (
                 details["name"],
                 details["class"],
@@ -82,6 +83,7 @@ class mysqlcon:
                 details["lastMarks"],
                 details["gender"],
                 details["familyIncome"],
+                staff,
             ),
         )
 

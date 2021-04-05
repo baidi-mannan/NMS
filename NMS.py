@@ -102,7 +102,9 @@ def donorLogin():
             # cur.execute("""truncate donorList""")
 
             mysql.connection.commit()
-            return render_template("donor/donorRegister.html", userName=donorDetails["name"])
+            return render_template(
+                "donor/donorRegister.html", userName=donorDetails["name"]
+            )
 
         if request.form["button"] == "login":
             userName = donorDetails["userName"]
@@ -247,10 +249,47 @@ def updateStaffProfile():
 def registerStudent():
     global mysqlc
     if request.method == "POST":
-        mysqlc.registerStudent(request.form)
+        mysqlc.registerStudent(request.form, session["User"]["userName"])
 
         return "STUDENT REGISTERED"
     return render_template("staff/registerStudent.html", user=session["User"])
+
+
+@app.route("/donate-staff", methods=["GET", "POST"])
+def donateStaff():
+    if request.method == "POST":
+        amount = request.form["amount"]
+        donorName = request.form["donorName"]
+        return redirect(
+            url_for("makePaymentbyStaff", amount=amount, donorName=donorName)
+        )
+
+    return render_template(
+        "staff/donateStaff.html",
+    )
+
+
+@app.route("/make-payment-staff", methods=["GET", "POST"])
+@staff_login_required
+def makePaymentbyStaff():
+    amount = request.args["amount"]
+    donorName = request.args["donorName"]
+    if request.method == "POST":
+        cur = mysql.connection.cursor()
+        cur.execute(
+            """INSERT INTO funds (userName,userType,amount,status,tranmessage) VALUES (%s,%s, %s ,%s,%s)""",
+            (
+                session["User"]["userName"],
+                session["User"]["type"],
+                amount,
+                1,
+                f"{donorName} donated Rs. {amount}",
+            ),
+        )
+        # cur.execute("commit")
+        mysql.connection.commit()
+        return "<h5>THANK YOU FOR CONTRIBUTING</h5>"
+    return render_template("donor/makePayment.html")
 
 
 @app.route("/stafflogout")
@@ -336,7 +375,7 @@ def donateMoney():
     return render_template("donor/donateMoney.html")
 
 
-@app.route("/make-payment", methods=["GET", "POST"])
+@app.route("/make-payment-donor", methods=["GET", "POST"])
 @donor_login_required
 def makePayment():
     amount = request.args["amount"]
@@ -863,7 +902,7 @@ def managerupdatedonor():
 @manager_login_required
 def managerhelpstudents():
     req = Requirement(mysql)
-    infoDict = req(forPrinting = False)
+    infoDict = req(forPrinting=False)
     AvailFunds = ngobank.getFunds()
     infoDict["AVA"] = AvailFunds
     infoDict["userName"] = session["User"]["userName"]
@@ -903,14 +942,24 @@ def managerhelpstudents():
             #     ]
             # )
 
-            return redirect(url_for('managershowhelp',donationid = donationid))
-        if request.form.get('DONATION') == 'Insufficient':
-            donationid = Help(mysql).InSufficientFulfil(infoDict,request.form['Priority'])
-            return redirect(url_for('managershowhelp',donationid = donationid))
-    if infoDict['REQ'] == 0:
-        return render_template("manager/managerHelpStudents.html",title = "All helps fulfilled", infoDict = infoDict)
-    if(infoDict['REQ']<= AvailFunds):
-        return render_template("manager/managerHelpStudents.html",title = "Sufficient Funds", infoDict = infoDict)
+            return redirect(url_for("managershowhelp", donationid=donationid))
+        if request.form.get("DONATION") == "Insufficient":
+            donationid = Help(mysql).InSufficientFulfil(
+                infoDict, request.form["Priority"]
+            )
+            return redirect(url_for("managershowhelp", donationid=donationid))
+    if infoDict["REQ"] == 0:
+        return render_template(
+            "manager/managerHelpStudents.html",
+            title="All helps fulfilled",
+            infoDict=infoDict,
+        )
+    if infoDict["REQ"] <= AvailFunds:
+        return render_template(
+            "manager/managerHelpStudents.html",
+            title="Sufficient Funds",
+            infoDict=infoDict,
+        )
     else:
         return render_template(
             "manager/managerHelpStudents.html",
@@ -958,7 +1007,7 @@ def managershowhelp():
 
                 from completedhelp order by donationid desc,id
                 ;""",
-            ()
+            (),
         ]
     )
 
@@ -969,24 +1018,40 @@ def managershowhelp():
         donationid=donationid,
     )
 
-@app.route("/manager-manage-staff",methods = ["GET","POST"])
+
+@app.route("/manager-manage-staff", methods=["GET", "POST"])
 @manager_login_required
 def managermanagestaff():
     global mysqlc
     if request.method == "POST":
-        if request.form.get('formName') == None and request.form.get('pageOption') != "Remove Staff":
-            return render_template ('manager/managerManageStaff.html',user = None,status = 1,option = request.form)
-        if request.form.get('formName') == None and request.form.get('pageOption') == "Remove Staff":
-            query = mysqlc.select([
-                "select userName from stafflist where role = 'staff';",
-                ()
-            ])
-            if(len(query)==0):
+        if (
+            request.form.get("formName") == None
+            and request.form.get("pageOption") != "Remove Staff"
+        ):
+            return render_template(
+                "manager/managerManageStaff.html",
+                user=None,
+                status=1,
+                option=request.form,
+            )
+        if (
+            request.form.get("formName") == None
+            and request.form.get("pageOption") == "Remove Staff"
+        ):
+            query = mysqlc.select(
+                ["select userName from stafflist where role = 'staff';", ()]
+            )
+            if len(query) == 0:
                 return "No staff(s) in NGO"
             staffuserNameList = [row[0] for row in query]
-            return render_template ('manager/managerManageStaff.html',user = staffuserNameList,status = 1,option= request.form)
-            
-        if request.form.get('formName') == "Register Staff" :
+            return render_template(
+                "manager/managerManageStaff.html",
+                user=staffuserNameList,
+                status=1,
+                option=request.form,
+            )
+
+        if request.form.get("formName") == "Register Staff":
             sinfo = request.form
             query = mysqlc.select(
                 [
@@ -995,37 +1060,52 @@ def managermanagestaff():
                     from stafflist 
                     where userName = %s or email = %s or contactnumber = %s;
                     """,
-                    (sinfo['userName'],sinfo['email'],sinfo['phone'],sinfo['userName'],sinfo['email'],sinfo['phone'],)
+                    (
+                        sinfo["userName"],
+                        sinfo["email"],
+                        sinfo["phone"],
+                        sinfo["userName"],
+                        sinfo["email"],
+                        sinfo["phone"],
+                    ),
                 ]
             )
-            if query[0][0] + query[0][1] + query[0][2]>0 :
+            if query[0][0] + query[0][1] + query[0][2] > 0:
                 errorMessage = ""
-                if(query[0][0]>0):
+                if query[0][0] > 0:
                     errorMessage = errorMessage + "userName Already taken,"
-                if(query[0][1]>0):
+                if query[0][1] > 0:
                     errorMessage = errorMessage + "email Already present in database,"
-                if(query[0][2]>0):
+                if query[0][2] > 0:
                     errorMessage = errorMessage + "Phone number present in database,"
                 errorMessage = errorMessage + " Please give new details"
                 return errorMessage
-            s = Staff(sinfo['name'], sinfo['userName'], Contact(sinfo['email'], sinfo['phone']), sinfo['password_1'])
-            mysqlc.exeandcommit(
-                s.getsqlandvalues()
+            s = Staff(
+                sinfo["name"],
+                sinfo["userName"],
+                Contact(sinfo["email"], sinfo["phone"]),
+                sinfo["password_1"],
             )
+            mysqlc.exeandcommit(s.getsqlandvalues())
             return "Successful Staff registration"
-        if request.form.get('formName') == 'Remove Staff':
-            query = mysqlc.select([
-                "select userName from stafflist where userName = %s;",
-                (request.form.get('staffUserName'),)
-            ])
-            if(len(query)==0):
+        if request.form.get("formName") == "Remove Staff":
+            query = mysqlc.select(
+                [
+                    "select userName from stafflist where userName = %s;",
+                    (request.form.get("staffUserName"),),
+                ]
+            )
+            if len(query) == 0:
                 return "Staff Already Removed from NGO"
-            mysqlc.exeandcommit([
-                "DELETE FROM stafflist WHERE userName = %s",
-                (request.form.get('staffUserName'),)
-            ])
+            mysqlc.exeandcommit(
+                [
+                    "DELETE FROM stafflist WHERE userName = %s",
+                    (request.form.get("staffUserName"),),
+                ]
+            )
             return f"{request.form.get('staffUserName')} Removed from NGO!"
-    return render_template ('manager/managerManageStaff.html',user = None,status = None)
+    return render_template("manager/managerManageStaff.html", user=None, status=None)
+
 
 @app.route("/manager-register-student", methods=["GET", "POST"])
 @manager_login_required
@@ -1037,17 +1117,19 @@ def managerregisterStudent():
         return "STUDENT REGISTERED"
     return render_template("staff/registerStudent.html", user=session["User"])
 
+
 @app.route("/manager-manage-student")
 @manager_login_required
 def managermanagestudent():
     return render_template("manager/managerManageStudent.html")
+
 
 @app.route("/manager-update-student", methods=["GET", "POST"])
 @manager_login_required
 def managerupdatestudent():
     global mysqlc
     query = mysqlc.select(["select id,name from studentlist", ()])
-    inputs = [[row[0],row[1]] for row in query]
+    inputs = [[row[0], row[1]] for row in query]
 
     if request.method == "POST":
         if request.form["formName"] == "chooseStudent":
@@ -1078,16 +1160,16 @@ def managerupdatestudent():
                 "name": query[0][1],
                 "class": query[0][2],
                 "requirement_fees": query[0][3],
-                'requirement_book':query[0][4],
-                'requirement_bag':query[0][5],
-                'requirement_shoes':query[0][6],
-                'requirement_clothes':query[0][7],
-                'email':query[0][8],
-                'rollnumber':query[0][9],
-                'contactnumber':query[0][10],
-                'lastmarks':query[0][11],
-                'gender':query[0][12],
-                'familyincome':query[0][13],
+                "requirement_book": query[0][4],
+                "requirement_bag": query[0][5],
+                "requirement_shoes": query[0][6],
+                "requirement_clothes": query[0][7],
+                "email": query[0][8],
+                "rollnumber": query[0][9],
+                "contactnumber": query[0][10],
+                "lastmarks": query[0][11],
+                "gender": query[0][12],
+                "familyincome": query[0][13],
             }
             return render_template(
                 "manager/managerUpdateStudent.html", inputs=inputs, user=user
@@ -1102,14 +1184,20 @@ def managerupdatestudent():
                     from studentlist 
                     where (email = %s or contactnumber = %s) and id != %s ;
                     """,
-                    (sinfo['email'],sinfo['contactnumber'],sinfo['email'],sinfo['contactnumber'],int(sinfo['id']))
+                    (
+                        sinfo["email"],
+                        sinfo["contactnumber"],
+                        sinfo["email"],
+                        sinfo["contactnumber"],
+                        int(sinfo["id"]),
+                    ),
                 ]
             )
-            if query[0][0] + query[0][1]>0 :
+            if query[0][0] + query[0][1] > 0:
                 errorMessage = ""
-                if(query[0][0]>0):
+                if query[0][0] > 0:
                     errorMessage = errorMessage + "email Already present in database,"
-                if(query[0][1]>0):
+                if query[0][1] > 0:
                     errorMessage = errorMessage + "Phone number present in database,"
                 errorMessage = errorMessage + " Please give new details"
                 return errorMessage
@@ -1148,8 +1236,9 @@ def managerupdatestudent():
                 return "wrong password"
         return request.form
     return render_template(
-                "manager/managerUpdateStudent.html", inputs=inputs, user=None
-            )
+        "manager/managerUpdateStudent.html", inputs=inputs, user=None
+    )
+
 
 if __name__ == "__main__":
     app.run(debug=True)
