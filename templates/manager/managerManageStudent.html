@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/manager/style.css') }}">
+    <title>Manage Students</title>
+</head>
+<body>
+    
+    <button class = "button__homepage"onClick="document.location ='managerprofilepage'">Profile Page</button>   
+    
+    <div class="body">
+        
+        <div class="con">
+        <h3>Please choose among the following options</h3>
+        
+        <div class="options">
+            <button onClick="document.location ='manager-register-student'">Register Students</button>
+            <button type="button" onclick="document.location='manager-update-student'">Update Student</button>
+        </div>
+        
+
+    </div>
+
+    
+</body>
+</html>

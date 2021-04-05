@@ -15,8 +15,15 @@
         
         <div >
         <h1>Help List</h1><br>
-        {% if donationid != None  %}
-        <h2>Current Donation id {{ donationid }}</h1>
+        {% if donationid == None  %}
+        
+            
+        {% else %}
+            {% if donationid == '-1' %}
+                <h2>No Help issued, Please see requirements!</h2>
+            {% else %}
+                <h2>Current Donation id {{ donationid }}</h2>
+            {% endif %}
         {% endif %}
         </div>
 
@@ -27,7 +34,12 @@
                 <th class = "table__header">{{name}}</th>
             {% endfor %}
             {% for row in query %}
+                {% if row[0]== (donationid|int) %}
+                <tr class = "table__row__selected">
+                {% else %}
                 <tr class = "table__row">
+                {% endif %} 
+                
                     {% for data in row %}
                         <td class = "table__cell">{{ data }}</td>
                     {% endfor %}

@@ -86,3 +86,25 @@ class mysqlcon:
         )
 
         self.db.commit()
+    def updateStudent(self, details):
+        self.validate()
+        self.cursor.execute(
+            """UPDATE studentlist SET name=%s,class=%s,requirement_fees=%s,requirement_book=%s,requirement_bag=%s,requirement_shoes=%s,requirement_clothes=%s,email=%s,rollnumber=%s,contactnumber=%s,lastmarks=%s,gender=%s,familyincome=%s where id =%s""",
+            (
+                details["name"],
+                details["class"],
+                details["requirement_fees"],
+                details["requirement_book"],
+                details["requirement_bag"],
+                details["requirement_shoes"],
+                details["requirement_clothes"],
+                details["email"],
+                details["rollnumber"],
+                details["contactnumber"],
+                details["lastmarks"],
+                details["gender"],
+                details["familyincome"],
+                details['id'],
+            ),
+        )
+        self.db.commit()

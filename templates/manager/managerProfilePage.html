@@ -7,22 +7,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Raleway&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/manager/managerProfilePage.css') }}">
-    <title>Donor Profile</title>
+    <title>Manager Profile</title>
 </head>
 <body>
     
     <div class="body">
         
-        <div >
-        <h1>Welcome Back,Manager {{Userdetails["name"]}}</h1>
-        </div>
-        <br>
+        
         <div class="con">
+            <h2>Welcome Back, <br> Manager {{Userdetails["name"]}}</h2>
             <h3>Please choose among the following options</h3>
             <div class="donate">
-                <button onClick="document.location ='donate-money'">DONOTE MONEY</button>
+                <button onClick="document.location ='manager-manage-student'">Manage Students</button>
                 <button type="button"onClick="document.location ='manager-check-records'">Check Records</button>
-                <button type="button"onClick="document.location = 'donate-item'">DONOTE ITEM</button>
+                <button onClick="document.location ='manager-manage-staff'">Manage Staff</button>
             </div>
             
             <div class="donate">
@@ -37,6 +35,11 @@
                 <button type="button"onClick="document.location = 'manager-help-students'">Help Students</button>
                 <button type="button"onClick="document.location = 'manager-show-help'">See Help</button>
             </div>
+            <!-- <div class="donate">
+                <button onClick="document.location ='manager-manage-staff'">Manage Staff</button>
+                <button type="button"onClick="document.location = 'manager-manage-students'">Manage Students</button>
+                <button type="button"onClick="document.location = 'manager-show-help'">See Help</button>
+            </div> -->
             <div class="donate">
                 <button onClick="document.location ='update-manager-profile'">UPDATE PROFILE</button>
                 <button type="button"onClick="document.location = 'manager-manual'">USER MANUAL</button>
