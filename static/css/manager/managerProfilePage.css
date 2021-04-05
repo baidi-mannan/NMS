@@ -4,70 +4,82 @@ body {
     font-family: 'Raleway', sans-serif;
     background-color: #2c2f33;
     user-select: none;
-    width:95%;
-  }
-  *{
-    font-family: 'Raleway', sans-serif;
-  
- } 
-.body {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 95vw;
-        padding: 15px;
-        height:90vh;
-        justify-content: space-between;
-        
-      }
-h1{
-        height: 50px;
-        font-size:50px;
-        margin: 80px 0 10px 0;
-    }  
-    
-    .con{
-        height: fit-content;
-        font-size: 25px;
-        width: 550px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content:space-around;
-        
-    }
-    button
-    {
-        cursor: pointer;
-        width:300px;
-        height: 50px;
-        padding: 1px;
-        background-color: #fd5217;
-        font-size: 18px;
-        color: floralwhite;
-        box-shadow:3px 3px 5px black;
-        
-    }
-  .options button
-  {   height: max-content;
-      width: max-content;
-      color: whitesmoke;
-      font-size: 15px;
-  }    
-  .options
-  {   
-      width: 70%;
-      display: flex;
-      justify-content:space-between;
-      align-items: center;
-      height:60px;
-  }
-  .donate {
-    width: 750px;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      /* border: 2px solid black; */
-      padding: 2px;
+    width: 95%;
+}
 
-  }
+* {
+    font-family: 'Raleway', sans-serif;
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 95vw;
+    padding: 15px;
+    height: 90vh;
+    justify-content: space-between;
+}
+
+h1 {
+    height: 50px;
+    font-size: 50px;
+    margin: 80px 0 10px 0;
+}
+
+.con {
+    height: fit-content;
+    font-size: 25px;
+    width: 550px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+}
+
+button {
+    cursor: pointer;
+    width: 300px;
+    height: 50px;
+    padding: 1px;
+    background-color: #fd5217;
+    font-size: 18px;
+    color: floralwhite;
+    box-shadow: 3px 3px 5px black;
+}
+
+.options button {
+    height: max-content;
+    width: max-content;
+    color: whitesmoke;
+    font-size: 15px;
+}
+
+.options {
+    width: 70%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+}
+
+.donate {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 2px;
+}
+
+.grid {
+    width: 980px;
+    height: 300px;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    align-items: center;
+}
+
+button:hover {
+    background-color: rgb(54, 36, 93);
+}

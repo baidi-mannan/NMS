@@ -1,59 +1,63 @@
 body {
-  color: floralwhite;
-  margin: 0;
-  font-family: "DM Serif Display", serif;
-  background-color: #2c2f33;
-  user-select: none;
+    color: floralwhite;
+    margin: 0;
+    font-family: 'Raleway', sans-serif;
+    background-color: #2c2f33;
+    user-select: none;
 }
+
+
 /* *{
   border: 5px solid black;
 } */
+
 .body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 92vw;
-  height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 92vw;
+    height: 90vh;
 }
+
 .content {
-
-
-  width:90%;
-  height: 300px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: center;
-  text-align: left;
-
-  font-size:30px;
-  padding: 30px;
-  
-  
+    width: 90%;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    text-align: left;
+    font-size: 30px;
+    padding: 30px;
 }
-.content h1 , .content p,.content h5
-{
-  margin: 10px;
 
+.content h1,
+.content p,
+.content h5 {
+    margin: 10px;
 }
+
+
 /* .content p{
 
   font-weight: normal;
 } */
-.option {
 
-  width: 70%;
-  height: 200px;
-  display: flex;
-  justify-content: space-between;
-  flex-direction: column;
+.option {
+    width: 70%;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    align-items: center;
 }
+
 .option button {
-  width: 100%;
-  padding: 5px;
-  margin: 10px;
-  cursor: pointer;
-  background-color: chartreuse;
-  font-weight: bolder;
-  font-family: "Pangolin", cursive;
+    width: 60%;
+    height: 60px;
+    padding: 5px;
+    margin: 10px;
+    cursor: pointer;
+    background-color: chartreuse;
+    font-size: 20px;
+    font-weight: bolder;
 }
