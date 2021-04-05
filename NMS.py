@@ -519,6 +519,7 @@ def managershowstudentlist():
         "Last Marks",
         "Family Income",
         "Contact Number",
+        "Registered By",
         "Help Required(Rs.)",
     )
     global mysqlc
@@ -528,7 +529,7 @@ def managershowstudentlist():
     print(priceDict, file=sys.stderr)
     query = mysqlc.select(
         [
-            "select id,Name,Class,rollnumber,lastmarks,familyincome,contactnumber,(requirement_fees+%s*requirement_book + %s*requirement_bag + %s*requirement_shoes + %s*requirement_clothes)  from studentlist order by id",
+            "select id,Name,Class,rollnumber,lastmarks,familyincome,contactnumber,registeredBy,(requirement_fees+%s*requirement_book + %s*requirement_bag + %s*requirement_shoes + %s*requirement_clothes)  from studentlist order by id",
             (
                 priceDict["BOOK"],
                 priceDict["BAG"],
@@ -1112,7 +1113,7 @@ def managermanagestaff():
 def managerregisterStudent():
     global mysqlc
     if request.method == "POST":
-        mysqlc.registerStudent(request.form)
+        mysqlc.registerStudent(request.form,session['User']['userName'])
 
         return "STUDENT REGISTERED"
     return render_template("staff/registerStudent.html", user=session["User"])
