@@ -40,7 +40,7 @@ def staff_login_required(f):
         if ("User" in session) and (session["User"]["type"] == "staff"):
             return f(*args, **kwargs)
         else:
-            print("You need to login first", file=sys.stderr)
+            # print("You need to login first", file=sys.stderr)
             return redirect("/staff-login")
 
     return wrap
@@ -52,7 +52,7 @@ def donor_login_required(f):
         if ("User" in session) and (session["User"]["type"] == "donor"):
             return f(*args, **kwargs)
         else:
-            print("You need to login first", file=sys.stderr)
+            # print("You need to login first", file=sys.stderr)
             return redirect("/donor-login")
 
     return wrap
@@ -64,7 +64,7 @@ def manager_login_required(f):
         if ("User" in session) and (session["User"]["type"] == "manager"):
             return f(*args, **kwargs)
         else:
-            print("You need to login first", file=sys.stderr)
+            # print("You need to login first", file=sys.stderr)
             return redirect("/manager-login")
 
     return wrap
@@ -162,7 +162,7 @@ def staffLogin():
                 (userName,),
             ]
         )
-        print(query)
+        # print(query)
         if len(query) == 0:
             # return "<h5> NO SUCH USERNAME EXISTS<br> PLEASE TRY AGAIN</h5>"
             return render_template("GeneralMessage.html",message="NO SUCH USERNAME EXISTS! PLEASE TRY AGAIN")
@@ -234,7 +234,7 @@ def updateStaffProfile():
                             userID,
                         ),
                     )
-                    print(inputs["newPassword"])
+                    # print(inputs["newPassword"])
                     mysql.connection.commit()
                     session.pop("User", None)
                     return redirect(url_for("staffLogin"))
@@ -467,7 +467,7 @@ def managerlogout():
 @app.route("/donorprofilepage")
 @donor_login_required
 def donorprofilepage():
-    print(f"session['User'] = {session['User']}", file=sys.stderr)
+    # print(f"session['User'] = {session['User']}", file=sys.stderr)
     return render_template("donor/donorProfilePage.html", Userdetails=session["User"])
 
 
@@ -519,7 +519,7 @@ def donateItem():
     if request.method == "POST":
         global inventory
         donation = request.form
-        print(donation, file=sys.stderr)
+        # print(donation, file=sys.stderr)
         donated = False
         donationfreq = int(donation["book"])
         if donationfreq > 0:
@@ -591,7 +591,7 @@ def updateDonorProfile():
                             userID,
                         ),
                     )
-                    print(inputs["newPassword"])
+                    # print(inputs["newPassword"])
                     mysql.connection.commit()
                     session.pop("User", None)
                     return redirect(url_for("donorLogin"))
@@ -611,7 +611,7 @@ def updateDonorProfile():
         #             (session["User"]["userName"],),
         #         ]
         #     )
-        # print(f"Query Took {time.time()-tick}",file=sys.stderr)
+        # # print(f"Query Took {time.time()-tick}",file=sys.stderr)
         # user={}
         # user['name']=query[0][2]
         # user['userName']=query[0][1]
@@ -640,7 +640,7 @@ def managershowstudentlist():
     priceList = mysqlc.select(["select itemname,price from inventory", ()])
 
     priceDict = dict(priceList)
-    print(priceDict, file=sys.stderr)
+    # print(priceDict, file=sys.stderr)
     query = mysqlc.select(
         [
             "select id,Name,Class,rollnumber,lastmarks,familyincome,contactnumber,registeredBy,(requirement_fees+%s*requirement_book + %s*requirement_bag + %s*requirement_shoes + %s*requirement_clothes)  from studentlist order by id",
@@ -653,7 +653,7 @@ def managershowstudentlist():
         ]
     )
 
-    print(query, file=sys.stderr)
+    # print(query, file=sys.stderr)
 
     return render_template(
         "manager/showStudent.html", headerName=headerName, query=query
@@ -669,7 +669,7 @@ def managershowstafflist():
         ["select id,name,email,contactnumber from stafflist where role = 'staff'", ()]
     )
 
-    print(query, file=sys.stderr)
+    # print(query, file=sys.stderr)
 
     return render_template("manager/showStaff.html", headerName=headerName, query=query)
 
@@ -692,11 +692,11 @@ def managershowdonorlist():
         ]
     )
 
-    print(query, file=sys.stderr)
+    # print(query, file=sys.stderr)
 
     return render_template("manager/showDonor.html", headerName=headerName, query=query)
 
-    print(query, file=sys.stderr)
+    # print(query, file=sys.stderr)
 
     return render_template("manager/showStaff.html", headerName=headerName, query=query)
 
@@ -712,7 +712,7 @@ def managershowfunds():
         ]
     )
 
-    print(query, file=sys.stderr)
+    # print(query, file=sys.stderr)
 
     return render_template("manager/showFunds.html", BalanceFund=query[0][0])
 
@@ -726,7 +726,7 @@ def managershowinventorylist():
         ["select itemname,frequency,price from inventory order by itemid", ()]
     )
 
-    print(query, file=sys.stderr)
+    # print(query, file=sys.stderr)
 
     return render_template(
         "manager/showInventory.html", headerName=headerName, query=query
@@ -839,7 +839,7 @@ def managerbuyitem():
                 )
             )
             # return render_template("manager/managerBuyItem.html",priceDict = priceDict,status = -2,bamount = orderRequiredAmount, funds= funds)
-        print(orderForm, file=sys.stderr)
+        # print(orderForm, file=sys.stderr)
         inventory.AddMultiple(orderForm)
         ngobank.withdraw(
             session["User"]["userName"],
@@ -911,7 +911,7 @@ def updatemanagerprofile():
 
             if slqandval is not False:
                 mysqlc.exeandcommit(slqandval)
-                print((request.form["newPassword"], slqandval), file=sys.stderr)
+                # print((request.form["newPassword"], slqandval), file=sys.stderr)
                 return redirect(url_for("managerlogout"))
             else:
                 return "Wrong Password"

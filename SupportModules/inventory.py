@@ -5,7 +5,7 @@ import time
 class Inventory:
     # def __init__(self,dblogin:dict):
     def __init__(self, mysql):
-        self.debug =True
+        self.debug =False
         self.__freq = {}
         for itm in ItemType:
             self.__freq[itm.name] = 0
@@ -38,7 +38,7 @@ class Inventory:
         self.cursor.execute(sql,val)
         self.mysql.connection.commit()
         query = self.cursor.rowcount
-        print(f"{query} Row(s) updated successfully",file=sys.stderr)
+        # print(f"{query} Row(s) updated successfully",file=sys.stderr)
         return 1
         # showing success
     
@@ -51,7 +51,7 @@ class Inventory:
             self.cursor.execute(sql,val)
             self.mysql.connection.commit()
             query = self.cursor.rowcount
-            print(f"{query} Row(s) updated successfully",file=sys.stderr)
+            # print(f"{query} Row(s) updated successfully",file=sys.stderr)
             return 1
         else:
             raise ValueError(f"Inventory Underflow, have {curfreq} but requested to remove {number}")
@@ -62,8 +62,8 @@ class Inventory:
         self.cursor.execute("SELECT * FROM inventory")
         myresult = self.cursor.fetchall()
 
-        for x in myresult:
-            print(f"{x[1]} : {x[2]}")
+        # for x in myresult:
+            # print(f"{x[1]} : {x[2]}")
 
     def UpdatePriceList(self, priceList:dict):
         tick = time.time()
