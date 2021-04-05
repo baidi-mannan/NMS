@@ -117,7 +117,9 @@ def donorLogin():
             )
 
             if len(query) == 0:
-                return "<h5> NO SUCH USERNAME EXISTS<br> PLEASE TRY AGAIN</h5>"
+                # return "<h5> NO SUCH USERNAME EXISTS<br> PLEASE TRY AGAIN</h5>"
+                return render_template("GeneralMessage.html",message="NO SUCH USERNAME EXISTS PLEASE TRY AGAIN")
+
             else:
                 # if(query[0][3] == Password(password).getEncryptedPassword()):
                 if query[0][3] == password:
@@ -134,8 +136,8 @@ def donorLogin():
                     }
                     return redirect(url_for("donorprofilepage"))
                 else:
-                    return "<h5> INCORRECT PASSWORD<br> PLEASE TRY AGAIN</h5>"
-
+                    # return "<h5> INCORRECT PASSWORD<br> PLEASE TRY AGAIN</h5>"
+                    return render_template("GeneralMessage.html",message="INCORRECT PASSWORD PLEASE TRY AGAIN")
     return render_template("donor/donorLogin.html", userType="donor")
 
 
@@ -275,7 +277,8 @@ def managercheckpassword():
         ]
     )
     if len(query) == 0:
-        return json.dumps({"statusCode": -1, "message": "User doesn't exist"})
+        # return json.dumps({"statusCode": -1, "message": "User doesn't exist"})
+        return render_template("GeneralMessage.html", message = "User doesn't exist")
     else:
         if query[0][3] == Password(password).getEncryptedPassword():
 
@@ -288,7 +291,8 @@ def managercheckpassword():
 
             return redirect("/managerprofilepage")
         else:
-            return json.dumps({"statusCode": -2, "message": f"Wrong password"})
+            # return json.dumps({"statusCode": -2, "message": f"Wrong password"})
+            return render_template("GeneralMessage.html", message = "Wrong password")
     return json.dumps({"statusCode": 1, "message": "Success"})
 
 
@@ -350,8 +354,8 @@ def makePayment():
         )
         # cur.execute("commit")
         mysql.connection.commit()
-        return "<h5>THANK YOU FOR CONTRIBUTING</h5>"
-
+        # return "<h5>THANK YOU FOR CONTRIBUTING</h5>"
+        return render_template("GeneralMessage.html",message="THANK YOU FOR CONTRIBUTING")
     return render_template("donor/makePayment.html")
 
 
@@ -420,7 +424,8 @@ def updateDonorProfile():
             session["User"]["contactNumber"] = donorDetails["contactNumber"]
             session["User"]["membership"] = member
             session.modified = True
-            return "<h5> USER DEATILS CHANGED</h5>"
+            # return "<h5> USER DEATILS CHANGED</h5>"
+            return render_template("GeneralMessage.html", message = "USER DEATILS CHANGED")
         if request.form["button"] == "changePassword":
             inputs = request.form
             if session["User"]["pw"] == inputs["oldPassword"]:
@@ -1138,7 +1143,7 @@ def managerupdatestudent():
             )
             if stmt is not False:
                 mysqlc.exeandcommit(stmt)
-                return "Password chaned Successfully"
+                return "Password changed Successfully"
             else:
                 return "wrong password"
         return request.form

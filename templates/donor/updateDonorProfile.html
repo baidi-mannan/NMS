@@ -18,16 +18,18 @@
     <h3> Update your Details</h3>
    
     <div>Name:<br>
-    <input type="text" name="name" value="{{user['name']}}">
+    <input type="text" name="name" value="{{user['name']}}" required>
     </div>
     <div>Username:<br>
     <input type="text" name="userName" class="permanent" value="{{user['userName']}}" disabled>
     </div>
     <div>Email ID:<br>
-    <input type="text" name ="email" value="{{user['email']}}" >
+    <input type="email" name ="email" value="{{user['email']}}" required>
     </div>
     <div>Contact Number:<br>
-    <input type="text" name ="contactNumber" value="{{user['contactNumber']}}">
+    <!-- <input type="text" name ="contactNumber" value="{{user['contactNumber']}}" required> -->
+    <input type="text" pattern= "[6-9]{1}[0-9]{9}"id = "contactNumber"name ="contactNumber" value="{{user['contactNumber']}}" oninvalid="setCustomValidity('Please enter a 10 digit number,starting with 6,7,8,9 ')"
+                    onchange="try{setCustomValidity('')}catch(e){alert(e)}" required >
     </div>
    
 
