@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Pangolin&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/manager/managerupdatestaff.css') }}">
+    <title>UPDATE STUDENT PROFILE</title>
+</head>
+<body>
+    <button class = "button__homepage"onClick="document.location ='staffprofilepage'">Profile Page</button>
+    <form class = "form__chooseDonor"name = "chooseStudentForm" method="POST" action="" onsubmit="var myElement = document.getElementById('chooseStudentButton'); myElement.innerText = 'Choosing ...'">
+        <select name="studentID">
+            {% for dusername in inputs %}
+                <option value="{{ dusername[0] }}">id={{ dusername[0] }}, {{dusername[1]}}</option>
+            {% endfor %}
+        </select>
+        <button name = formName id = 'chooseStudentButton' type="submit" value="chooseStudent">Choose</button>
+    </form>
+    <div class="body">
+        
+        
+        {% if user != None  %}
+        <div class="form__staff">    
+                <form class="form__student" name="profileForm" method="post" action="" onsubmit="var myElement = document.getElementById('infosubmit'); myElement.disabled=true; myElement.innerText='Saving…'; ">
+
+                    <h2> Update Student {{user['name']}}'s Details</h2>
+                    <!-- {% for k,v in user.items() %}
+                        <div class = "form__student__div">
+                            <label for="{{k}}"> {{ k| capitalize}}</label><br>
+                            {% if k == 'id' %}
+                                <input type="text" id="{{k}}" name="{{k}}" class= "permanent"value="{{user[k]}}" disabled = "true">
+                            {% else %}
+                                <input type="text" id="{{k}}" name="{{k}}" value="{{user[k]}}" required>
+                            {% endif %}
+                            
+                        </div>
+                    {% endfor %} -->
+
+                    <div class = "form__student__div">
+                        <label for="id"> Id</label><br>
+                        
+                            <input type="text" id="id"  class= "permanent"value="{{user['id']}}" disabled = "true">
+                            <input type="hidden" name = "id" value="{{user['id']}}"/>
+                        
+                    </div>
+                
+                    <div class = "form__student__div">
+                        <label for="name"> Name</label><br>
+                        
+                            <input type="text" id="name" name="name" value="{{user['name']}}" required>
+                        
+                        
+                    </div>
+                
+                    <div class = "form__student__div">
+                        <label for="class"> Class</label><br>
+                        
+                            <input type="number" min=1 max=12 id="class" name="class" value="{{user['class']}}" required>
+                        
+                        
+                    </div>
+                
+                    <div class = "form__student__div">
+                        <label for="requirement_fees"> Requirement_fees</label><br>
+                        
+                            <input type="number" min =0 id="requirement_fees" name="requirement_fees" value="{{user['requirement_fees']}}" required>
+                        
+                        
+                    </div>
+                
+                    <div class = "form__student__div">
+                        <label for="requirement_book"> Requirement_book</label><br>
+                        
+                            <input type="number" min =0 id="requirement_book" name="requirement_book" value="{{user['requirement_book']}}" required>
+                        
+                        
+                    </div>
+                
+                    <div class = "form__student__div">
+                        <label for="requirement_bag"> Requirement_bag</label><br>
+                        
+                            <input type="number" min =0 id="requirement_bag" name="requirement_bag" value="{{user['requirement_bag']}}" required>
+                        
+                        
+                    </div>
+                
+                    <div class = "form__student__div">
+                        <label for="requirement_shoes"> Requirement_shoes</label><br>
+                        
+                            <input type="number" min =0 id="requirement_shoes" name="requirement_shoes" value="{{user['requirement_shoes']}}" required>
+                        
+                        
+                    </div>
+                
+                    <div class = "form__student__div">
+                        <label for="requirement_clothes"> Requirement_clothes</label><br>
+                        
+                            <input type="number" min =0 id="requirement_clothes" name="requirement_clothes" value="{{user['requirement_clothes']}}" required>
+                        
+                        
+                    </div>
+                
+                    <div class = "form__student__div">
+                        <label for="email"> Email</label><br>
+                        
+                            <input type="email" id="email" name="email" value="{{user['email']}}" required>
+                        
+                        
+                    </div>
+                
+                    <div class = "form__student__div">
+                        <label for="rollnumber"> Rollnumber</label><br>
+                        
+                            <input type="text" id="rollnumber" name="rollnumber" value="{{user['rollnumber']}}" required>
+                        
+                        
+                    </div>
+                
+                    <div class = "form__student__div">
+                        <label for="contactnumber"> Contactnumber</label><br>
+                        
+                            <input type="text" id="contactnumber" name="contactnumber" value="{{user['contactnumber']}}" required>
+                        
+                        
+                    </div>
+                
+                    <div class = "form__student__div">
+                        <label for="lastmarks"> Lastmarks</label><br>
+                        
+                            <input type="text" id="lastmarks" name="lastmarks" value="{{user['lastmarks']}}" required>
+                        
+                        
+                    </div>
+                
+                    <div class = "form__student__div">
+                        <label for="gender"> Gender</label><br>
+                            <select name="gender" id="gender">
+                                {% if user['gender'] == 'male' %}
+                                    <option value="male" selected>Male</option>
+                                    <option value="female" >Female</option>
+                                {% else %}
+                                    <option value="male" >Male</option>
+                                    <option value="female" selected>Female</option>
+                                {% endif %}
+                            </select>
+                    </div>
+                
+                    <div class = "form__student__div">
+                        <label for="familyincome"> Familyincome</label><br>
+
+                            <input type="text" id="familyincome" name="familyincome" value="{{user['familyincome']}}" required>
+                    </div>
+                    <!-- <div>
+                        <label for="name">Name:</label><br>
+                        <input type="text" id="name" name="name" value="{{user['name']}}" required>
+                    </div>
+                    <div>
+                        <label for="userName">User Name:</label><br>
+                        <input type="text"id="userName" name="userNameD" class="permanent" value="{{user['userName']}}" disabled>
+                        <input type="hidden" name="userName"  value="{{user['userName']}}" >
+                    </div>
+                    <div>
+                        <label for="email">Email Id:</label><br>
+                        <input type="email"id = "email"name ="email" value="{{user['email']}}" required >
+                    </div>
+                    <div>
+                        <label for="phone">Phone No:</label><br>
+                        <input type="text" pattern= "[6-9]{1}[0-9]{9}"id = "phone"name ="phone" value="{{user['phone']}}"oninvalid="setCustomValidity('Please enter a 10 digit number,starting with 6,7,8,9 ')"
+                        onchange="try{setCustomValidity('')}catch(e){alert(e)}" required >
+                    </div> -->
+                    <input type="hidden" name = "formName" value="updateProfile"/>
+                    <button name="button" id="infosubmit" type="submit" value="save"> Save Changes</button> 
+                </form>
+    </div>
+    <div class ="options"> 
+    
+        <button name ="button" type="button"onClick="document.location = 'managerprofilepage'">Discard Changes</button>
+    </div>
+    {% endif %}
+  </div>    
+  
+
+  <script>
+    var password = document.getElementById("newPassword"), confirm_password = document.getElementById("reNewPassword");
+    // var phone = document.getElementById("phone");
+    function validatePassword(){
+    if(password.value != confirm_password.value) {
+        confirm_password.setCustomValidity("Passwords Don't Match");
+    } else {
+        confirm_password.setCustomValidity('');
+    }
+    }
+    password.onchange = validatePassword;
+    confirm_password.onkeyup = validatePassword;
+</script>
+</body>
+</html>
