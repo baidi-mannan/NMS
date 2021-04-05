@@ -245,10 +245,47 @@ def updateStaffProfile():
 def registerStudent():
     global mysqlc
     if request.method == "POST":
-        mysqlc.registerStudent(request.form)
+        mysqlc.registerStudent(request.form, session["User"]["userName"])
 
         return "STUDENT REGISTERED"
     return render_template("staff/registerStudent.html", user=session["User"])
+
+
+@app.route("/donate-staff", methods=["GET", "POST"])
+def donateStaff():
+    if request.method == "POST":
+        amount = request.form["amount"]
+        donorName = request.form["donorName"]
+        return redirect(
+            url_for("makePaymentbyStaff", amount=amount, donorName=donorName)
+        )
+
+    return render_template(
+        "staff/donateStaff.html",
+    )
+
+
+@app.route("/make-payment", methods=["GET", "POST"])
+@staff_login_required
+def makePaymentbyStaff():
+    amount = request.args["amount"]
+    donorName = request.args["donorName"]
+    if request.method == "POST":
+        cur = mysql.connection.cursor()
+        cur.execute(
+            """INSERT INTO funds (userName,userType,amount,status,tranmessage) VALUES (%s,%s, %s ,%s,%s)""",
+            (
+                session["User"]["userName"],
+                session["User"]["type"],
+                amount,
+                1,
+                f"{donorName} donated Rs. {amount}",
+            ),
+        )
+        # cur.execute("commit")
+        mysql.connection.commit()
+        return "<h5>THANK YOU FOR CONTRIBUTING</h5>"
+    return render_template("donor/makePayment.html")
 
 
 @app.route("/stafflogout")
@@ -327,7 +364,7 @@ def donateMoney():
 
     if request.method == "POST":
         amount = request.form["amount"]
-        return redirect(url_for("makePayment", amount=amount))
+        return redirect(url_for("makePaymentbyStaff", amount=amount))
 
     return render_template("donor/donateMoney.html")
 
