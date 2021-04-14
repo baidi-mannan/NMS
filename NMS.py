@@ -1125,7 +1125,6 @@ def managershowhelp():
             (),
         ]
     )
-
     return render_template(
         "manager/managerShowHelps.html",
         query=query,
