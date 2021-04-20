@@ -17,3 +17,6 @@ You have to create your own database and can execute it.
 ## Environment
 
 Run pip install -r requirements.txt
+
+## Contact
+ For any queries, feel free to contact me at [mannanbaidi@gmail.com]
