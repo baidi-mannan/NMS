@@ -1,4 +1,4 @@
-#Introduction
+##Introduction
 This is a NGO Managment Site (NMS) of a organistion which takes donation from the donors and runs a School. 
 There ar three type of members in the Site
 1. Maanger
