@@ -11,10 +11,10 @@ app = Flask(__name__)
 # app.config["MYSQL_PASSWORD"] = "un2P67tMei"
 # app.config["MYSQL_HOST"] = "sql6.freemysqlhosting.net"
 # app.config["MYSQL_DB"] = "sql6401232"
-app.config["MYSQL_USER"] = "admin"
-app.config["MYSQL_PASSWORD"] = "nmszka323"
-app.config["MYSQL_HOST"] = "nmsdb.czj2xnercmna.us-east-2.rds.amazonaws.com"
-app.config["MYSQL_DB"] = "coredb"
+# app.config["MYSQL_USER"] = "admin"
+# app.config["MYSQL_PASSWORD"] = "nmszka323"
+# app.config["MYSQL_HOST"] = "nmsdb.czj2xnercmna.us-east-2.rds.amazonaws.com"
+# app.config["MYSQL_DB"] = "coredb"
 # app.config["MYSQL_CURSORCLASS"]
 
 # for session
